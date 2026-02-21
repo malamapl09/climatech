@@ -12,12 +12,10 @@ export default async function OperationsPage({
   const routes = await getRoutesForDate(date);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Centro de Operaciones
-        </h1>
-      </div>
+    <div>
+      <h1 className="mb-6 text-[22px] font-extrabold text-gray-900">
+        Centro de Operaciones
+      </h1>
       <RoutePlanner initialRoutes={routes} initialDate={date} />
     </div>
   );

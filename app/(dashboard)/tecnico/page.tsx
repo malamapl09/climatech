@@ -13,24 +13,51 @@ export default async function TechnicianPage() {
 
   const today = todayISO();
 
-  const { data: route } = await supabase
-    .from("routes")
-    .select(
-      `*, jobs(*, photos(id, status), materials(id, name, quantity, checked))`
-    )
-    .eq("technician_id", user.id)
-    .eq("date", today)
-    .eq("published", true)
-    .single();
+  const [{ data: route }, { data: profile }] = await Promise.all([
+    supabase
+      .from("routes")
+      .select(
+        `*, jobs(*, photos(id, status), materials(id, name, quantity, checked))`
+      )
+      .eq("technician_id", user.id)
+      .eq("date", today)
+      .eq("published", true)
+      .single(),
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single(),
+  ]);
+
+  const userName = profile?.full_name ?? "Tecnico";
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Mi Ruta de Hoy</h1>
+    <div>
       {route ? (
-        <RouteList route={route} />
+        <RouteList route={route} userName={userName} />
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
-          <p className="text-gray-500">No tienes ruta asignada para hoy.</p>
+        <div
+          style={{ maxWidth: 600, margin: "0 auto" }}
+        >
+          <div className="mb-1 text-[13px]" style={{ color: "#6B7280" }}>
+            Hola, {userName.split(" ")[0]} 👋
+          </div>
+          <div className="mb-6 text-[22px] font-extrabold text-gray-900">
+            Tu Ruta de Hoy
+          </div>
+          <div
+            className="rounded-[16px] bg-white py-16 text-center"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+          >
+            <div className="text-4xl">📋</div>
+            <p className="mt-3 text-sm font-semibold" style={{ color: "#6B7280" }}>
+              No tienes ruta asignada para hoy
+            </p>
+            <p className="mt-1 text-[13px]" style={{ color: "#9CA3AF" }}>
+              Tu supervisor te asignara una ruta cuando haya trabajos programados.
+            </p>
+          </div>
         </div>
       )}
     </div>

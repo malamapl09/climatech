@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card } from "@heroui/react";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function JobApprovalForm({
   jobId,
   canApprove,
+  pendingCount,
   onApproved,
   onRejected,
 }: {
   jobId: string;
   canApprove: boolean;
+  pendingCount: number;
   onApproved: () => void;
   onRejected: () => void;
 }) {
@@ -67,88 +67,117 @@ export function JobApprovalForm({
     }
   }
 
-  return (
-    <Card>
-      <Card.Header>
-        <Card.Title>Aprobacion del Trabajo</Card.Title>
-      </Card.Header>
-      <Card.Content className="space-y-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Observaciones del supervisor
+  // If all photos are approved, show the approval form
+  if (canApprove) {
+    return (
+      <>
+        <div className="mb-3.5">
+          <label
+            className="mb-1.5 block text-xs font-bold uppercase tracking-wider"
+            style={{ color: "#0369A1" }}
+          >
+            Observaciones del Supervisor
           </label>
           <textarea
-            className="w-full rounded-lg border border-gray-300 p-3 text-sm dark:border-gray-700 dark:bg-gray-900"
-            rows={3}
-            placeholder="Observaciones generales sobre el trabajo realizado..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
+            placeholder="Escriba sus observaciones sobre el trabajo..."
+            className="w-full resize-y rounded-[10px] p-3 text-sm outline-none"
+            style={{
+              border: "2px solid #BAE6FD",
+              minHeight: 70,
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+              background: "#fff",
+            }}
           />
         </div>
 
-        {!canApprove && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
-            Debes revisar todas las fotos antes de aprobar el trabajo.
-          </p>
-        )}
-
-        {!showReject ? (
-          <div className="flex gap-2">
-            <Button
-              className="bg-green-600 text-white"
-              onPress={handleApprove}
-              isDisabled={!canApprove || loading}
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <CheckCircle className="mr-2 h-4 w-4" />
-              )}
-              Aprobar Trabajo
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-red-600"
-              onPress={() => setShowReject(true)}
-              isDisabled={loading}
-            >
-              <XCircle className="mr-2 h-4 w-4" />
-              Rechazar Trabajo
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950">
-            <label className="block text-sm font-medium text-red-700 dark:text-red-300">
-              Motivo del rechazo
-            </label>
+        {showReject ? (
+          <div
+            className="mb-3 rounded-[10px] p-3.5"
+            style={{ background: "#FEF2F2" }}
+          >
             <textarea
-              className="w-full rounded-lg border border-red-300 p-3 text-sm dark:border-red-700 dark:bg-gray-900"
-              rows={2}
-              placeholder="Describe que debe corregir el tecnico..."
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Motivo del rechazo del trabajo..."
+              className="w-full resize-y rounded-lg p-2.5 text-[13px] outline-none"
+              style={{
+                border: "2px solid #FECACA",
+                minHeight: 50,
+                fontFamily: "inherit",
+                boxSizing: "border-box",
+              }}
             />
-            <div className="flex gap-2">
-              <Button
-                className="bg-red-600 text-white"
-                onPress={handleReject}
-                isDisabled={loading || !rejectReason.trim()}
+            <div className="mt-2 flex gap-2">
+              <button
+                onClick={handleReject}
+                disabled={loading || !rejectReason.trim()}
+                className="cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
+                style={{ background: "#DC2626" }}
               >
                 Confirmar Rechazo
-              </Button>
-              <Button
-                variant="ghost"
-                onPress={() => {
-                  setShowReject(false);
-                  setRejectReason("");
+              </button>
+              <button
+                onClick={() => setShowReject(false)}
+                className="cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
+                style={{
+                  border: "1px solid #E5E7EB",
+                  background: "#fff",
+                  color: "#6B7280",
                 }}
               >
                 Cancelar
-              </Button>
+              </button>
             </div>
           </div>
+        ) : (
+          <div className="flex gap-2.5">
+            <button
+              onClick={handleApprove}
+              disabled={loading}
+              className="flex-1 cursor-pointer rounded-[10px] border-none py-3 text-sm font-bold text-white"
+              style={{
+                background: "linear-gradient(135deg, #059669, #047857)",
+                boxShadow: "0 4px 12px rgba(5,150,105,0.3)",
+              }}
+            >
+              ✅ Aprobar Trabajo Completo
+            </button>
+            <button
+              onClick={() => setShowReject(true)}
+              disabled={loading}
+              className="cursor-pointer rounded-[10px] bg-transparent px-5 py-3 text-[13px] font-bold"
+              style={{ border: "2px solid #DC2626", color: "#DC2626" }}
+            >
+              ✗ Rechazar
+            </button>
+          </div>
         )}
-      </Card.Content>
-    </Card>
+      </>
+    );
+  }
+
+  // Still has pending photos
+  if (pendingCount > 0) {
+    return (
+      <div
+        className="rounded-lg px-4 py-2.5 text-center text-[13px] font-semibold"
+        style={{ background: "rgba(255,255,255,0.7)", color: "#0369A1" }}
+      >
+        ⬇️ Revise las {pendingCount} foto{pendingCount > 1 ? "s" : ""} pendiente{pendingCount > 1 ? "s" : ""} abajo para poder aprobar el trabajo
+      </div>
+    );
+  }
+
+  // Fallback — some photos still rejected
+  return (
+    <div
+      className="rounded-lg px-4 py-2.5 text-center text-[13px] font-semibold"
+      style={{ background: "rgba(255,255,255,0.7)", color: "#D97706" }}
+    >
+      Hay fotos rechazadas pendientes de resubida por el tecnico
+    </div>
   );
 }

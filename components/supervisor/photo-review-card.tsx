@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@heroui/react";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import { FormField } from "@/components/shared/form-field";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoStatusBadge } from "@/components/shared/photo-status-badge";
 import { formatDateTime } from "@/lib/utils/date";
@@ -87,107 +85,131 @@ export function PhotoReviewCard({
     }
   }
 
+  const isPending = canReview && photo.status === "pending";
+
   return (
     <div
-      className={`rounded-lg border p-3 ${
-        photo.status === "rejected"
-          ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950"
-          : photo.status === "approved"
-            ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950"
-            : "border-gray-200 dark:border-gray-800"
-      }`}
+      className="flex gap-4 rounded-[14px] bg-white p-4"
+      style={{
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        border: isPending
+          ? "2px solid #BAE6FD"
+          : "2px solid transparent",
+        alignItems: "flex-start",
+      }}
     >
-      <div className="flex gap-4">
-        {/* Photo */}
-        <div className="w-40 shrink-0 overflow-hidden rounded-lg">
-          {url ? (
-            <img
-              src={url}
-              alt={photo.description}
-              className="h-32 w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-32 items-center justify-center bg-gray-100 dark:bg-gray-900">
-              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-            </div>
-          )}
-        </div>
-
-        {/* Details */}
-        <div className="flex-1 space-y-2">
-          <div className="flex items-start justify-between">
-            <p className="font-medium">{photo.description}</p>
-            <PhotoStatusBadge status={photo.status} />
+      {/* Photo thumbnail */}
+      <div className="w-[110px] flex-shrink-0 overflow-hidden rounded-[10px]">
+        {url ? (
+          <img
+            src={url}
+            alt={photo.description}
+            className="h-[110px] w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-[110px] items-center justify-center" style={{ background: "#F3F4F6" }}>
+            <Loader2 className="h-5 w-5 animate-spin" style={{ color: "#9CA3AF" }} />
           </div>
-          <p className="text-xs text-gray-500">
-            {formatDateTime(photo.created_at)}
-          </p>
+        )}
+      </div>
 
-          {photo.status === "rejected" && photo.reject_reason && (
-            <p className="text-sm text-red-600 dark:text-red-400">
-              Motivo: {photo.reject_reason}
-            </p>
-          )}
-
-          {/* Review actions */}
-          {canReview && photo.status === "pending" && (
-            <div className="space-y-2">
-              {!rejecting ? (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-green-600"
-                    onPress={handleApprove}
-                    isDisabled={loading}
-                  >
-                    <CheckCircle className="mr-1 h-4 w-4" />
-                    Aprobar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-red-600"
-                    onPress={() => setRejecting(true)}
-                    isDisabled={loading}
-                  >
-                    <XCircle className="mr-1 h-4 w-4" />
-                    Rechazar
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <FormField
-                    label="Motivo del rechazo"
-                    placeholder="Ej: Foto borrosa, no se ve la conexion"
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-red-600 text-white"
-                      onPress={handleReject}
-                      isDisabled={loading || !rejectReason.trim()}
-                    >
-                      Confirmar Rechazo
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onPress={() => {
-                        setRejecting(false);
-                        setRejectReason("");
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              )}
+      {/* Details */}
+      <div className="flex-1">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-sm font-bold text-gray-900">
+              {photo.description}
             </div>
-          )}
+            <div className="mt-[3px] text-[11px]" style={{ color: "#9CA3AF" }}>
+              {formatDateTime(photo.created_at)}
+            </div>
+          </div>
+          <PhotoStatusBadge status={photo.status} />
         </div>
+
+        {/* Reject reason */}
+        {photo.status === "rejected" && photo.reject_reason && (
+          <div
+            className="mt-2.5 rounded-[10px] px-3.5 py-2.5"
+            style={{
+              background: "#FEF2F2",
+              borderLeft: "3px solid #DC2626",
+            }}
+          >
+            <div
+              className="mb-0.5 text-[11px] font-bold uppercase"
+              style={{ color: "#DC2626" }}
+            >
+              Motivo de Rechazo
+            </div>
+            <div className="text-[13px]" style={{ color: "#7F1D1D" }}>
+              {photo.reject_reason}
+            </div>
+          </div>
+        )}
+
+        {/* Supervisor photo actions */}
+        {isPending && (
+          <>
+            {rejecting ? (
+              <div
+                className="mt-2.5 rounded-lg p-3"
+                style={{ background: "#FEF2F2" }}
+              >
+                <input
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Motivo del rechazo de esta foto..."
+                  className="w-full rounded-md border p-2 text-[13px] outline-none"
+                  style={{ border: "1px solid #FECACA", boxSizing: "border-box" }}
+                />
+                <div className="mt-2 flex gap-1.5">
+                  <button
+                    onClick={handleReject}
+                    disabled={loading || !rejectReason.trim()}
+                    className="cursor-pointer rounded-md border-none px-3.5 py-1.5 text-[11px] font-bold text-white"
+                    style={{ background: "#DC2626" }}
+                  >
+                    Rechazar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRejecting(false);
+                      setRejectReason("");
+                    }}
+                    className="cursor-pointer rounded-md px-3.5 py-1.5 text-[11px] font-semibold"
+                    style={{
+                      border: "1px solid #E5E7EB",
+                      background: "#fff",
+                      color: "#6B7280",
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-2.5 flex gap-2">
+                <button
+                  onClick={handleApprove}
+                  disabled={loading}
+                  className="cursor-pointer rounded-lg border-none px-[18px] py-[7px] text-xs font-bold text-white"
+                  style={{ background: "#059669" }}
+                >
+                  ✓ Aprobar Foto
+                </button>
+                <button
+                  onClick={() => setRejecting(true)}
+                  disabled={loading}
+                  className="cursor-pointer rounded-lg bg-transparent px-[18px] py-[7px] text-xs font-bold"
+                  style={{ border: "2px solid #DC2626", color: "#DC2626" }}
+                >
+                  ✗ Rechazar
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

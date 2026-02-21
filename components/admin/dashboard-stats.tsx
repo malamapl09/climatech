@@ -1,17 +1,3 @@
-import { Card } from "@heroui/react";
-import {
-  Briefcase,
-  Clock,
-  PlayCircle,
-  Eye,
-  CheckCircle,
-  Send,
-  Wrench,
-  Settings,
-  Hammer,
-  Users,
-} from "lucide-react";
-
 interface Stats {
   totalJobsToday: number;
   byStatus: {
@@ -29,82 +15,35 @@ interface Stats {
   totalTechnicians: number;
 }
 
-const statusCards = [
-  { key: "scheduled" as const, label: "Programados", icon: Clock, color: "text-gray-600" },
-  { key: "in_progress" as const, label: "En Progreso", icon: PlayCircle, color: "text-blue-600" },
-  { key: "supervisor_review" as const, label: "En Revision", icon: Eye, color: "text-amber-600" },
-  { key: "approved" as const, label: "Aprobados", icon: CheckCircle, color: "text-green-600" },
-  { key: "report_sent" as const, label: "Reportes Enviados", icon: Send, color: "text-teal-600" },
-];
-
 export function DashboardStats({ stats }: { stats: Stats }) {
-  return (
-    <div className="space-y-6">
-      {/* Top row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          icon={<Briefcase className="h-6 w-6 text-blue-600" />}
-          label="Trabajos Hoy"
-          value={stats.totalJobsToday}
-        />
-        <StatCard
-          icon={<Users className="h-6 w-6 text-purple-600" />}
-          label="Tecnicos Activos"
-          value={stats.totalTechnicians}
-        />
-        <StatCard
-          icon={<Wrench className="h-6 w-6 text-blue-500" />}
-          label="Instalaciones"
-          value={stats.byServiceType.installation}
-        />
-        <StatCard
-          icon={<Settings className="h-6 w-6 text-green-500" />}
-          label="Mantenimientos"
-          value={stats.byServiceType.maintenance}
-        />
-      </div>
+  const cards = [
+    { label: "Total Hoy", value: stats.totalJobsToday, accent: "#1E3A5F" },
+    { label: "En Progreso", value: stats.byStatus.in_progress, accent: "#D97706" },
+    { label: "Revision Sup.", value: stats.byStatus.supervisor_review, accent: "#0369A1" },
+    { label: "Aprobados", value: stats.byStatus.approved, accent: "#059669" },
+    { label: "Reporte Enviado", value: stats.byStatus.report_sent, accent: "#4338CA" },
+    { label: "Programados", value: stats.byStatus.scheduled, accent: "#6B7280" },
+  ];
 
-      {/* Status breakdown */}
-      <div>
-        <h3 className="mb-3 font-semibold">Trabajos por Estado (Hoy)</h3>
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {statusCards.map(({ key, label, icon: Icon, color }) => (
-            <Card key={key}>
-              <Card.Content className="flex items-center gap-3 p-4">
-                <Icon className={`h-5 w-5 ${color}`} />
-                <div>
-                  <p className="text-2xl font-bold">{stats.byStatus[key]}</p>
-                  <p className="text-xs text-gray-500">{label}</p>
-                </div>
-              </Card.Content>
-            </Card>
-          ))}
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {cards.map((s, i) => (
+        <div
+          key={i}
+          className="rounded-[14px] bg-white px-4 py-4"
+          style={{
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            borderLeft: `4px solid ${s.accent}`,
+          }}
+        >
+          <div className="text-[28px] font-extrabold" style={{ color: s.accent }}>
+            {s.value}
+          </div>
+          <div className="mt-0.5 text-[11px]" style={{ color: "#6B7280" }}>
+            {s.label}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number;
-}) {
-  return (
-    <Card>
-      <Card.Content className="flex items-center gap-4 p-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-          {icon}
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{value}</p>
-          <p className="text-sm text-gray-500">{label}</p>
-        </div>
-      </Card.Content>
-    </Card>
   );
 }

@@ -1,20 +1,9 @@
 "use client";
 
-/**
- * RoutePlanner
- *
- * Top-level client component for the Operations Center page.
- * Renders a date navigator and a responsive grid of RouteCards.
- * Provides an "Agregar Ruta" modal to create new routes for the selected day.
- *
- * Usage (already wired in the page):
- *   <RoutePlanner initialRoutes={routes} initialDate={date} />
- */
-
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, RefreshCw } from "lucide-react";
-import { Button, Card, Modal, useOverlayState } from "@heroui/react";
+import { Plus } from "lucide-react";
+import { Button, Modal, useOverlayState } from "@heroui/react";
 import { createRoute } from "@/lib/actions/routes";
 import { createClient } from "@/lib/supabase/client";
 import { RouteCard } from "@/components/operations/route-card";
@@ -37,10 +26,8 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const modalState = useOverlayState();
-  // Track whether the technician list has been fetched.
   const hasFetchedTechs = useRef(false);
 
-  // Sync prop changes (e.g. after server-side navigation) into local state.
   useEffect(() => {
     setRoutes(initialRoutes);
   }, [initialRoutes]);
@@ -49,7 +36,6 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
     setSelectedDate(initialDate);
   }, [initialDate]);
 
-  // Lazy-load technicians the first time the "Agregar Ruta" modal opens.
   useEffect(() => {
     if (!modalState.isOpen || hasFetchedTechs.current) return;
     hasFetchedTechs.current = true;
@@ -79,12 +65,6 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
     router.push(`/operaciones?date=${next}`);
   }
 
-  function handleRouteCreated(newRoute: RouteWithJobs) {
-    setRoutes((prev) => [...prev, newRoute]);
-    setRouteNotes("");
-    modalState.close();
-  }
-
   function handleCreateRoute() {
     if (!selectedTechId) {
       setError("Selecciona un tecnico.");
@@ -100,8 +80,6 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
           notes: routeNotes.trim() || undefined,
         });
 
-        // Build a minimal RouteWithJobs so the UI updates immediately without
-        // waiting for a full server refetch.
         const tech = technicians.find((t) => t.id === selectedTechId);
         const optimistic: RouteWithJobs = {
           ...route,
@@ -112,7 +90,9 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
           },
           jobs: [],
         };
-        handleRouteCreated(optimistic);
+        setRoutes((prev) => [...prev, optimistic]);
+        setRouteNotes("");
+        modalState.close();
         router.refresh();
       } catch (err: unknown) {
         setError(
@@ -122,14 +102,80 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
     });
   }
 
+  // KPI calculations
+  const allJobs = routes.flatMap((r) => r.jobs);
+  const kpis = [
+    {
+      label: "Tecnicos Activos",
+      value: routes.length,
+      accent: "#1E3A5F",
+      icon: "👷",
+    },
+    {
+      label: "Trabajos Hoy",
+      value: allJobs.length,
+      accent: "#0369A1",
+      icon: "📋",
+    },
+    {
+      label: "Instalaciones",
+      value: allJobs.filter((j) => j.service_type === "installation").length,
+      accent: "#1E3A5F",
+      icon: "🔧",
+    },
+    {
+      label: "Mantenimientos",
+      value: allJobs.filter((j) => j.service_type === "maintenance").length,
+      accent: "#059669",
+      icon: "🛠️",
+    },
+    {
+      label: "Reparaciones",
+      value: allJobs.filter((j) => j.service_type === "repair").length,
+      accent: "#D97706",
+      icon: "⚡",
+    },
+  ];
+
+  const inputCls =
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+
   return (
     <div className="space-y-6">
-      {/* ── Toolbar ── */}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {kpis.map((s, i) => (
+          <div
+            key={i}
+            className="rounded-[14px] bg-white px-4 py-4"
+            style={{
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              borderLeft: `4px solid ${s.accent}`,
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div
+                className="text-[26px] font-extrabold"
+                style={{ color: s.accent }}
+              >
+                {s.value}
+              </div>
+              <span className="text-xl">{s.icon}</span>
+            </div>
+            <div className="mt-1 text-[11px]" style={{ color: "#6B7280" }}>
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <label
             htmlFor="route-date"
-            className="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0"
+            className="shrink-0 text-sm font-medium"
+            style={{ color: "#6B7280" }}
           >
             Fecha de ruta
           </label>
@@ -138,41 +184,37 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
             type="date"
             value={selectedDate}
             onChange={handleDateChange}
-            className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-            aria-label="Seleccionar fecha de ruta"
+            className={inputCls}
+            style={{ width: "auto" }}
           />
         </div>
 
-        <Button
-          variant="primary"
-          onPress={modalState.open}
-          className="flex items-center gap-2 self-start sm:self-auto"
-          aria-label="Agregar nueva ruta"
+        <button
+          onClick={() => modalState.open()}
+          className="flex items-center gap-2 self-start rounded-[10px] px-4 py-2.5 text-sm font-bold text-white transition-colors sm:self-auto"
+          style={{ background: "#1E3A5F" }}
         >
-          <Plus className="h-4 w-4" aria-hidden="true" />
+          <Plus className="h-4 w-4" />
           Agregar Ruta
-        </Button>
+        </button>
       </div>
 
-      {/* ── Route grid ── */}
+      {/* Route cards */}
       {routes.length === 0 ? (
-        <Card className="py-16">
-          <Card.Content className="flex flex-col items-center gap-3 text-center">
-            <RefreshCw
-              className="h-10 w-10 text-gray-300 dark:text-gray-700"
-              aria-hidden="true"
-            />
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              No hay rutas para el{" "}
-              <time dateTime={selectedDate}>{selectedDate}</time>.
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-600">
-              Crea una ruta con el boton de arriba para comenzar.
-            </p>
-          </Card.Content>
-        </Card>
+        <div
+          className="rounded-[16px] bg-white py-16 text-center"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div className="text-4xl">📋</div>
+          <p className="mt-3 text-sm font-medium" style={{ color: "#6B7280" }}>
+            No hay rutas para esta fecha.
+          </p>
+          <p className="mt-1 text-xs" style={{ color: "#9CA3AF" }}>
+            Crea una ruta con el boton de arriba para comenzar.
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4">
           {routes.map((route) => (
             <RouteCard
               key={route.id}
@@ -183,38 +225,33 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
         </div>
       )}
 
-      {/* ── Agregar Ruta modal ── */}
+      {/* Create Route Modal */}
       <Modal state={modalState}>
         <Modal.Backdrop isDismissable>
           <Modal.Container size="sm">
             <Modal.Dialog>
               <Modal.Header>
                 <Modal.Heading>Nueva Ruta</Modal.Heading>
-                <Modal.CloseTrigger aria-label="Cerrar modal" />
+                <Modal.CloseTrigger />
               </Modal.Header>
 
               <Modal.Body className="space-y-4">
                 {error && (
-                  <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+                  <p role="alert" className="text-sm text-red-600">
                     {error}
                   </p>
                 )}
 
-                {/* Technician select */}
                 <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="new-route-tech"
-                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Tecnico <span aria-hidden="true">*</span>
+                  <label htmlFor="new-route-tech" className="text-sm font-medium" style={{ color: "#374151" }}>
+                    Tecnico *
                   </label>
                   <select
                     id="new-route-tech"
                     value={selectedTechId}
                     onChange={(e) => setSelectedTechId(e.target.value)}
                     required
-                    aria-required="true"
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                    className={inputCls}
                   >
                     {technicians.length === 0 && (
                       <option value="" disabled>
@@ -230,12 +267,8 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
                   </select>
                 </div>
 
-                {/* Notes textarea */}
                 <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="new-route-notes"
-                    className="text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
+                  <label htmlFor="new-route-notes" className="text-sm font-medium" style={{ color: "#374151" }}>
                     Notas internas
                   </label>
                   <textarea
@@ -243,8 +276,8 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
                     value={routeNotes}
                     onChange={(e) => setRouteNotes(e.target.value)}
                     rows={3}
-                    placeholder="Observaciones opcionales para el operador..."
-                    className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                    placeholder="Observaciones opcionales..."
+                    className={inputCls}
                   />
                 </div>
               </Modal.Body>
@@ -261,7 +294,6 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
                   variant="primary"
                   onPress={handleCreateRoute}
                   isDisabled={isPending || !selectedTechId}
-                  aria-busy={isPending}
                 >
                   {isPending ? "Creando..." : "Crear Ruta"}
                 </Button>

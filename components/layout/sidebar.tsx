@@ -10,10 +10,8 @@ import {
   Users,
   Briefcase,
   Bell,
-  Snowflake,
 } from "lucide-react";
 import type { UserRole } from "@/types";
-import { cn } from "@/lib/utils/cn";
 
 interface NavItem {
   label: string;
@@ -23,7 +21,7 @@ interface NavItem {
 
 const navByRole: Record<UserRole, NavItem[]> = {
   operations: [
-    { label: "Centro de Operaciones", href: "/operaciones", icon: <Map className="h-5 w-5" /> },
+    { label: "Operaciones", href: "/operaciones", icon: <Map className="h-5 w-5" /> },
     { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
   ],
   technician: [
@@ -31,7 +29,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
   ],
   supervisor: [
-    { label: "Cola de Revision", href: "/supervisor", icon: <ClipboardCheck className="h-5 w-5" /> },
+    { label: "Supervisor", href: "/supervisor", icon: <ClipboardCheck className="h-5 w-5" /> },
     { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
   ],
   admin: [
@@ -47,26 +45,41 @@ export function Sidebar({ role }: { role: UserRole }) {
   const items = navByRole[role] || [];
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950 lg:block">
-      <div className="flex h-16 items-center gap-2 border-b border-gray-200 px-6 dark:border-gray-800">
-        <Snowflake className="h-6 w-6 text-blue-600" />
-        <span className="text-lg font-bold">ClimaTech</span>
+    <aside className="hidden w-60 shrink-0 flex-col bg-white lg:flex" style={{ borderRight: "1px solid #E5E7EB" }}>
+      {/* Logo */}
+      <div className="flex h-[60px] items-center gap-2.5 px-5" style={{ borderBottom: "1px solid #E5E7EB" }}>
+        <div
+          className="flex h-[34px] w-[34px] items-center justify-center rounded-[10px]"
+          style={{ background: "linear-gradient(135deg, #1E3A5F, #2D5F8A)" }}
+        >
+          <span className="text-base">❄️</span>
+        </div>
+        <div>
+          <div className="text-[15px] font-extrabold text-gray-900">ClimaTech</div>
+          <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>
+            Gestion de Campo
+          </div>
+        </div>
       </div>
-      <nav className="flex flex-col gap-1 p-4">
+
+      {/* Nav */}
+      <nav className="flex flex-col gap-1 p-3">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
+            (item.href !== "/" &&
+              item.href !== "/notificaciones" &&
+              pathname.startsWith(item.href));
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-900"
-              )}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold no-underline transition-colors"
+              style={{
+                background: isActive ? "#1E3A5F" : "transparent",
+                color: isActive ? "#fff" : "#6B7280",
+              }}
             >
               {item.icon}
               {item.label}

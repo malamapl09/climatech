@@ -1,1 +1,27 @@
 @import "@heroui/styles";
+
+/* ClimaTech Design System */
+:root {
+  --ct-navy: #1E3A5F;
+  --ct-navy-light: #2D5F8A;
+  --ct-green: #059669;
+  --ct-green-dark: #047857;
+  --ct-amber: #D97706;
+  --ct-amber-dark: #B45309;
+  --ct-blue: #0369A1;
+  --ct-blue-dark: #0C4A6E;
+  --ct-indigo: #4338CA;
+  --ct-indigo-dark: #3730A3;
+  --ct-red: #DC2626;
+  --ct-bg: #F5F6F8;
+  --ct-surface: #FFFFFF;
+}
+
+body {
+  background-color: var(--ct-bg);
+}
+
+@keyframes ct-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

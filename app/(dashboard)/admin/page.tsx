@@ -6,7 +6,6 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const today = todayISO();
 
-  // Fetch metrics
   const [
     { count: totalJobsToday },
     { count: scheduledToday },
@@ -66,8 +65,10 @@ export default async function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div>
+      <h1 className="mb-6 text-[22px] font-extrabold text-gray-900">
+        Panel de Administracion
+      </h1>
       <DashboardStats stats={stats} />
     </div>
   );

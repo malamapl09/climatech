@@ -16,7 +16,7 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--ct-bg)" }}>
       <Sidebar role={profile.role} />
       <MobileNav
         role={profile.role}
@@ -28,7 +28,11 @@ export function DashboardShell({
           profile={profile}
           onMenuToggle={() => setMobileOpen(!mobileOpen)}
         />
-        <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-auto">
+          <div className="mx-auto max-w-[1200px] px-4 py-5 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

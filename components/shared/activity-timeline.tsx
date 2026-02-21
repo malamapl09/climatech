@@ -1,14 +1,5 @@
 "use client";
 
-import {
-  ArrowRight,
-  Camera,
-  CheckCircle,
-  XCircle,
-  MessageSquare,
-  Send,
-  UserPlus,
-} from "lucide-react";
 import { formatRelative } from "@/lib/utils/date";
 import type { ActivityType } from "@/types";
 
@@ -20,49 +11,58 @@ interface ActivityEntry {
   performer: { id: string; full_name: string } | null;
 }
 
-const typeIcons: Record<ActivityType, React.ReactNode> = {
-  status_change: <ArrowRight className="h-4 w-4" />,
-  photo_upload: <Camera className="h-4 w-4" />,
-  photo_review: <CheckCircle className="h-4 w-4" />,
-  note: <MessageSquare className="h-4 w-4" />,
-  report: <Send className="h-4 w-4" />,
-  assignment: <UserPlus className="h-4 w-4" />,
-};
-
-const typeColors: Record<ActivityType, string> = {
-  status_change: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
-  photo_upload: "bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400",
-  photo_review: "bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400",
-  note: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-  report: "bg-teal-100 text-teal-600 dark:bg-teal-950 dark:text-teal-400",
-  assignment: "bg-orange-100 text-orange-600 dark:bg-orange-950 dark:text-orange-400",
+const TYPE_COLORS: Record<ActivityType, string> = {
+  status_change: "#D97706",
+  photo_upload: "#0284C7",
+  photo_review: "#0369A1",
+  note: "#D1D5DB",
+  report: "#4338CA",
+  assignment: "#D97706",
 };
 
 export function ActivityTimeline({ entries }: { entries: ActivityEntry[] }) {
   if (entries.length === 0) {
     return (
-      <p className="text-sm text-gray-500">Sin actividad registrada.</p>
+      <p className="text-sm" style={{ color: "#9CA3AF" }}>
+        Sin actividad registrada.
+      </p>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {entries.map((entry) => (
-        <div key={entry.id} className="flex gap-3">
+    <div
+      className="rounded-[14px] bg-white p-5"
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+    >
+      <div className="relative">
+        {/* Vertical line */}
+        <div
+          className="absolute bottom-2 top-2 w-0.5"
+          style={{ left: 7, background: "#E5E7EB" }}
+        />
+
+        {entries.map((entry, i) => (
           <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${typeColors[entry.type]}`}
+            key={entry.id}
+            className="relative flex gap-3.5"
+            style={{ marginBottom: i < entries.length - 1 ? 16 : 0 }}
           >
-            {typeIcons[entry.type]}
+            <div
+              className="z-10 mt-0.5 h-4 w-4 shrink-0 rounded-full"
+              style={{ background: TYPE_COLORS[entry.type] || "#D1D5DB" }}
+            />
+            <div>
+              <div className="text-[13px] font-semibold text-gray-900">
+                {entry.action}
+              </div>
+              <div className="mt-0.5 text-[11px]" style={{ color: "#9CA3AF" }}>
+                {formatRelative(entry.created_at)} &middot;{" "}
+                {entry.performer?.full_name || "Sistema"}
+              </div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm">{entry.action}</p>
-            <p className="text-xs text-gray-500">
-              {entry.performer?.full_name || "Sistema"} &middot;{" "}
-              {formatRelative(entry.created_at)}
-            </p>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

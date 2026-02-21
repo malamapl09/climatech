@@ -2,17 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Card, Chip } from "@heroui/react";
-import {
-  MapPin,
-  Clock,
-  Navigation,
-  Camera,
-  CheckCircle,
-  ArrowLeft,
-} from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { WorkflowStepper } from "@/components/shared/workflow-stepper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import { PhotoUpload } from "@/components/technician/photo-upload";
@@ -41,10 +33,13 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [activeTab, setActiveTab] = useState<"fotos" | "bitacora">("fotos");
 
   const canStart = job.status === "scheduled";
   const canComplete = job.status === "in_progress" && job.photos.length > 0;
   const canUpload = job.status === "in_progress";
+
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`;
 
   async function handleStart() {
     setIsStarting(true);
@@ -82,138 +77,244 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
     }
   }
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`;
-
   return (
-    <div className="space-y-6">
+    <div>
       {/* Back + header */}
-      <div className="flex items-center gap-3">
-        <Link href="/tecnico">
-          <Button variant="ghost" isIconOnly>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+      <div className="mb-2 flex items-center gap-4">
+        <Link
+          href="/tecnico"
+          className="no-underline"
+          style={{
+            background: "#F3F4F6",
+            border: "none",
+            borderRadius: 10,
+            padding: "8px 16px",
+            fontSize: 14,
+            fontWeight: 600,
+            color: "#374151",
+          }}
+        >
+          ← Volver
         </Link>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold">{job.client_name}</h1>
-          <div className="flex items-center gap-2">
-            <StatusBadge status={job.status} />
-            <ServiceTypeBadge type={job.service_type} />
-          </div>
-        </div>
+        <ServiceTypeBadge type={job.service_type} />
+        <div className="flex-1" />
+        <StatusBadge status={job.status} />
       </div>
 
-      {/* Job details */}
-      <Card>
-        <Card.Content className="space-y-3 p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <MapPin className="h-4 w-4" />
-              <span>{job.address}</span>
+      {/* Workflow Stepper */}
+      <div
+        className="mb-4 rounded-[14px] bg-white px-6"
+        style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+      >
+        <WorkflowStepper status={job.status} />
+      </div>
+
+      {/* Info grid */}
+      <div
+        className="mb-4 grid gap-[18px] rounded-[14px] bg-white p-[22px]"
+        style={{
+          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+        }}
+      >
+        {[
+          { label: "Cliente", value: job.client_name },
+          { label: "Direccion", value: job.address },
+          { label: "Tecnico", value: job.technician.full_name },
+          { label: "Supervisor", value: job.supervisor.full_name },
+          { label: "Equipo", value: job.equipment || "—" },
+          { label: "Tiempo Est.", value: job.estimated_time ? `${job.estimated_time} min` : "—" },
+        ].map((item, i) => (
+          <div key={i}>
+            <div
+              className="mb-[3px] text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: "#9CA3AF" }}
+            >
+              {item.label}
             </div>
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="sm">
-                <Navigation className="mr-1 h-4 w-4" />
-                Navegar
-              </Button>
-            </a>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {item.value}
+            </div>
           </div>
-
-          {job.equipment && (
-            <p className="text-sm">
-              <span className="font-medium">Equipo:</span> {job.equipment}
-            </p>
-          )}
-
-          {job.estimated_time && (
-            <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-              <Clock className="h-4 w-4" />
-              <span>{job.estimated_time} min estimados</span>
-            </div>
-          )}
-
-          {job.instructions && (
-            <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950">
-              <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                Instrucciones
-              </p>
-              <p className="mt-1 text-sm">{job.instructions}</p>
-            </div>
-          )}
-
-          <p className="text-sm text-gray-500">
-            Supervisor: {job.supervisor.full_name}
-          </p>
-        </Card.Content>
-      </Card>
+        ))}
+      </div>
 
       {/* Start button */}
       {canStart && (
-        <Button
-          className="w-full bg-blue-600 text-white"
-          onPress={handleStart}
-          isDisabled={isStarting}
+        <div
+          className="mb-4 rounded-[14px] p-[22px] text-center"
+          style={{
+            background: "linear-gradient(135deg, #DBEAFE, #EFF6FF)",
+            border: "2px solid #0369A1",
+          }}
         >
-          {isStarting ? "Iniciando..." : "Iniciar Trabajo"}
-        </Button>
+          <div className="mb-3 text-sm font-bold" style={{ color: "#0C4A6E" }}>
+            Listo para empezar este trabajo
+          </div>
+          <button
+            onClick={handleStart}
+            disabled={isStarting}
+            className="cursor-pointer border-none text-sm font-bold text-white"
+            style={{
+              padding: "12px 28px",
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #0369A1, #0C4A6E)",
+            }}
+          >
+            {isStarting ? "Iniciando..." : "🔧 Iniciar Trabajo"}
+          </button>
+        </div>
       )}
 
-      {/* Materials */}
-      {job.materials.length > 0 && (
-        <Card>
-          <Card.Header>
-            <Card.Title>Materiales</Card.Title>
-          </Card.Header>
-          <Card.Content>
-            <MaterialsList materials={job.materials} jobId={job.id} />
-          </Card.Content>
-        </Card>
-      )}
-
-      {/* Photos section */}
-      <Card>
-        <Card.Header>
-          <Card.Title className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Evidencia Fotografica
-            <Chip size="sm" variant="soft">
-              {job.photos.length}
-            </Chip>
-          </Card.Title>
-        </Card.Header>
-        <Card.Content className="space-y-4">
-          {canUpload && (
-            <PhotoUpload
-              jobId={job.id}
-              onUploaded={() => router.refresh()}
-            />
+      {/* Instructions + Materials grid (tech view) */}
+      {(job.instructions || job.materials.length > 0) && (
+        <div className="mb-4 grid grid-cols-1 gap-[14px] sm:grid-cols-2">
+          {job.instructions && (
+            <div
+              className="rounded-[14px] bg-white p-[18px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <div
+                className="mb-2 text-[10px] font-bold uppercase"
+                style={{ color: "#9CA3AF" }}
+              >
+                Instrucciones
+              </div>
+              <div className="text-[13px] leading-relaxed" style={{ color: "#374151" }}>
+                {job.instructions}
+              </div>
+            </div>
           )}
-          <PhotoGrid photos={job.photos} />
-        </Card.Content>
-      </Card>
-
-      {/* Complete button */}
-      {canComplete && (
-        <Button
-          className="w-full bg-green-600 text-white"
-          onPress={handleComplete}
-          isDisabled={isCompleting}
-        >
-          <CheckCircle className="mr-2 h-5 w-5" />
-          {isCompleting
-            ? "Enviando a revision..."
-            : "Marcar como Completado"}
-        </Button>
+          {job.materials.length > 0 && (
+            <div
+              className="rounded-[14px] bg-white p-[18px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <div
+                className="mb-2 text-[10px] font-bold uppercase"
+                style={{ color: "#9CA3AF" }}
+              >
+                Materiales
+              </div>
+              <MaterialsList materials={job.materials} jobId={job.id} />
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Activity log */}
-      <Card>
-        <Card.Header>
-          <Card.Title>Actividad</Card.Title>
-        </Card.Header>
-        <Card.Content>
+      {/* Navigate button */}
+      <div className="mb-4">
+        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
+          <div
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-white py-3 text-[13px] font-semibold"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)", color: "#1E3A5F" }}
+          >
+            📍 Navegar a Direccion
+          </div>
+        </a>
+      </div>
+
+      {/* Complete CTA */}
+      {canComplete && (
+        <div
+          className="mb-4 rounded-[14px] p-[22px] text-center"
+          style={{
+            background: "linear-gradient(135deg, #FEF3C7, #FFFBEB)",
+            border: "2px solid #D97706",
+          }}
+        >
+          <div className="mb-2.5 text-sm font-bold" style={{ color: "#92400E" }}>
+            ¿Terminaste este trabajo?
+          </div>
+          <button
+            onClick={handleComplete}
+            disabled={isCompleting}
+            className="cursor-pointer border-none text-sm font-bold text-white"
+            style={{
+              padding: "12px 28px",
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #D97706, #B45309)",
+            }}
+          >
+            {isCompleting ? "Enviando..." : "🏁 Marcar como Terminado"}
+          </button>
+          <div className="mt-1.5 text-[11px]" style={{ color: "#92400E" }}>
+            Se enviara al supervisor para revision de fotos y aprobacion
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div
+        className="mb-4 flex w-fit gap-1 rounded-[10px] p-[3px]"
+        style={{ background: "#F3F4F6" }}
+      >
+        {[
+          { key: "fotos" as const, label: `Fotos (${job.photos.length})` },
+          { key: "bitacora" as const, label: `Bitacora (${activityLog.length})` },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className="cursor-pointer border-none text-xs font-semibold"
+            style={{
+              padding: "7px 18px",
+              borderRadius: 7,
+              background: activeTab === tab.key ? "#fff" : "transparent",
+              color: activeTab === tab.key ? "#111827" : "#6B7280",
+              boxShadow: activeTab === tab.key ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content: Fotos */}
+      {activeTab === "fotos" && (
+        <div className="space-y-3">
+          {canUpload && (
+            <div
+              className="rounded-[14px] bg-white p-[22px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <PhotoUpload
+                jobId={job.id}
+                onUploaded={() => router.refresh()}
+              />
+            </div>
+          )}
+
+          {job.photos.length === 0 ? (
+            <div
+              className="rounded-[14px] bg-white py-10 text-center"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <div className="text-[44px]">📷</div>
+              <div className="mt-2 text-[15px] font-semibold" style={{ color: "#9CA3AF" }}>
+                Sin fotos todavia
+              </div>
+            </div>
+          ) : (
+            <div
+              className="rounded-[14px] bg-white p-[22px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <PhotoGrid photos={job.photos} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab content: Bitacora */}
+      {activeTab === "bitacora" && (
+        <div
+          className="rounded-[14px] bg-white p-[22px]"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
           <ActivityTimeline entries={activityLog} />
-        </Card.Content>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }

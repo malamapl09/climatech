@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card, Chip } from "@heroui/react";
-import { Camera, CheckCircle, Clock, XCircle } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
-import { formatDate } from "@/lib/utils/date";
 import type { Job, Photo } from "@/types";
 
 type QueueJob = Job & {
@@ -14,91 +10,222 @@ type QueueJob = Job & {
   route: { date: string };
 };
 
-export function ReviewQueue({ jobs }: { jobs: QueueJob[] }) {
-  const needsReview = jobs.filter((j) => j.status === "supervisor_review");
-  const approved = jobs.filter((j) => j.status === "approved");
+export function ReviewQueue({
+  jobs,
+  userName,
+}: {
+  jobs: QueueJob[];
+  userName: string;
+}) {
+  const pending = jobs.filter((j) => j.status === "supervisor_review");
+  const approved = jobs.filter(
+    (j) => j.status === "approved" && !j.report_sent
+  );
+  const sent = jobs.filter((j) => j.status === "report_sent");
+  const inProg = jobs.filter(
+    (j) => j.status === "in_progress" || j.status === "scheduled"
+  );
+
+  const firstName = userName.split(" ")[0];
 
   return (
-    <div className="space-y-6">
-      {needsReview.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">
-            Pendientes de Revision ({needsReview.length})
-          </h2>
-          {needsReview.map((job) => (
-            <JobReviewCard key={job.id} job={job} />
+    <div>
+      {/* Greeting */}
+      <div className="mb-6">
+        <div className="mb-1 text-[13px]" style={{ color: "#6B7280" }}>
+          Hola, {firstName} 👋
+        </div>
+        <div className="text-[22px] font-extrabold text-gray-900">
+          Panel del Supervisor
+        </div>
+        <div className="mt-1 text-[13px]" style={{ color: "#6B7280" }}>
+          Revise fotos y apruebe los trabajos completados por los tecnicos
+        </div>
+      </div>
+
+      {/* Pending review */}
+      {pending.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2">
+            <div
+              className="h-2 w-2 rounded-full"
+              style={{
+                background: "#DC2626",
+                animation: "ct-pulse 2s infinite",
+              }}
+            />
+            <span
+              className="text-sm font-extrabold"
+              style={{ color: "#0C4A6E" }}
+            >
+              Pendientes — Revisar Fotos y Aprobar ({pending.length})
+            </span>
+          </div>
+          {pending.map((job) => (
+            <Link
+              key={job.id}
+              href={`/supervisor/trabajo/${job.id}`}
+              className="no-underline"
+            >
+              <div
+                className="mb-2.5 cursor-pointer rounded-[14px] bg-white p-[18px]"
+                style={{
+                  boxShadow: "0 2px 8px rgba(3,105,161,0.12)",
+                  borderLeft: "4px solid #0369A1",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-[15px] font-bold text-gray-900">
+                      {job.client_name}
+                    </div>
+                    <div className="text-xs" style={{ color: "#6B7280" }}>
+                      {job.technician.full_name} &middot; {job.equipment}
+                    </div>
+                    <div
+                      className="mt-1 text-xs"
+                      style={{ color: "#9CA3AF" }}
+                    >
+                      📷 {job.photos.length} fotos por revisar
+                    </div>
+                  </div>
+                  <span
+                    className="rounded-lg px-3.5 py-1.5 text-xs font-bold text-white"
+                    style={{ background: "#0369A1" }}
+                  >
+                    Revisar Fotos →
+                  </span>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       )}
 
+      {/* Approved - ready to send report */}
       {approved.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">
-            Aprobados — Pendientes de Reporte ({approved.length})
-          </h2>
+        <div className="mb-6">
+          <div
+            className="mb-3 text-sm font-extrabold"
+            style={{ color: "#065F46" }}
+          >
+            ✅ Aprobados — Enviar Reporte ({approved.length})
+          </div>
           {approved.map((job) => (
-            <JobReviewCard key={job.id} job={job} />
+            <Link
+              key={job.id}
+              href={`/supervisor/trabajo/${job.id}`}
+              className="no-underline"
+            >
+              <div
+                className="mb-2 cursor-pointer rounded-xl bg-white p-4"
+                style={{ borderLeft: "4px solid #059669" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-bold">{job.client_name}</div>
+                    <div className="text-xs" style={{ color: "#6B7280" }}>
+                      {job.equipment}
+                    </div>
+                  </div>
+                  <span
+                    className="rounded-lg px-3 py-1.5 text-[11px] font-bold text-white"
+                    style={{ background: "#4338CA" }}
+                  >
+                    Enviar Reporte →
+                  </span>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       )}
 
+      {/* Reports sent */}
+      {sent.length > 0 && (
+        <div className="mb-6">
+          <div
+            className="mb-3 text-sm font-bold"
+            style={{ color: "#4338CA" }}
+          >
+            📨 Reportes Enviados ({sent.length})
+          </div>
+          {sent.map((job) => (
+            <Link
+              key={job.id}
+              href={`/supervisor/trabajo/${job.id}`}
+              className="no-underline"
+            >
+              <div
+                className="mb-2 cursor-pointer rounded-xl p-3.5"
+                style={{ background: "#F9FAFB" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div
+                    className="text-[13px] font-semibold"
+                    style={{ color: "#374151" }}
+                  >
+                    {job.client_name} — {job.equipment}
+                  </div>
+                  <StatusBadge status={job.status} />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* In field */}
+      {inProg.length > 0 && (
+        <div>
+          <div
+            className="mb-3 text-[13px] font-bold"
+            style={{ color: "#6B7280" }}
+          >
+            En Campo ({inProg.length})
+          </div>
+          {inProg.map((job) => (
+            <Link
+              key={job.id}
+              href={`/supervisor/trabajo/${job.id}`}
+              className="no-underline"
+            >
+              <div
+                className="mb-2 cursor-pointer rounded-xl bg-white p-3.5"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div
+                      className="text-[13px] font-semibold"
+                      style={{ color: "#374151" }}
+                    >
+                      {job.client_name}
+                    </div>
+                    <div className="text-[11px]" style={{ color: "#9CA3AF" }}>
+                      {job.technician.full_name}
+                    </div>
+                  </div>
+                  <StatusBadge status={job.status} />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
       {jobs.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
-          <p className="text-gray-500">
-            No hay trabajos pendientes de revision.
+        <div
+          className="rounded-[16px] bg-white py-16 text-center"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div className="text-4xl">✅</div>
+          <p className="mt-3 text-sm font-semibold" style={{ color: "#6B7280" }}>
+            No hay trabajos pendientes de revision
           </p>
         </div>
       )}
     </div>
-  );
-}
-
-function JobReviewCard({ job }: { job: QueueJob }) {
-  const total = job.photos.length;
-  const pending = job.photos.filter((p) => p.status === "pending").length;
-  const approved = job.photos.filter((p) => p.status === "approved").length;
-  const rejected = job.photos.filter((p) => p.status === "rejected").length;
-
-  return (
-    <Link href={`/supervisor/trabajo/${job.id}`}>
-      <Card className="transition-shadow hover:shadow-md">
-        <Card.Content className="p-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="font-medium">{job.client_name}</p>
-              <p className="text-sm text-gray-500">
-                {job.technician.full_name} &middot; {formatDate(job.route.date)}
-              </p>
-            </div>
-            <StatusBadge status={job.status} />
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <ServiceTypeBadge type={job.service_type} />
-            <div className="flex items-center gap-1">
-              <Camera className="h-4 w-4 text-gray-400" />
-              <span className="text-sm text-gray-600">{total}</span>
-            </div>
-            {pending > 0 && (
-              <Chip variant="soft" size="sm" color="warning">
-                <Clock className="mr-1 inline h-3 w-3" />
-                {pending} pendientes
-              </Chip>
-            )}
-            {approved > 0 && (
-              <Chip variant="soft" size="sm" color="success">
-                <CheckCircle className="mr-1 inline h-3 w-3" />
-                {approved}
-              </Chip>
-            )}
-            {rejected > 0 && (
-              <Chip variant="soft" size="sm" color="danger">
-                <XCircle className="mr-1 inline h-3 w-3" />
-                {rejected}
-              </Chip>
-            )}
-          </div>
-        </Card.Content>
-      </Card>
-    </Link>
   );
 }
