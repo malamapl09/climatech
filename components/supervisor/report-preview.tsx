@@ -29,12 +29,17 @@ export function ReportPreview({
   useEffect(() => {
     const supabase = createClient();
     async function loadUrls() {
+      const results = await Promise.all(
+        approvedPhotos.map((photo) =>
+          supabase.storage
+            .from("job-photos")
+            .createSignedUrl(photo.storage_path, 3600)
+            .then(({ data }) => ({ id: photo.id, url: data?.signedUrl }))
+        )
+      );
       const urls: Record<string, string> = {};
-      for (const photo of approvedPhotos) {
-        const { data } = await supabase.storage
-          .from("job-photos")
-          .createSignedUrl(photo.storage_path, 3600);
-        if (data?.signedUrl) urls[photo.id] = data.signedUrl;
+      for (const r of results) {
+        if (r.url) urls[r.id] = r.url;
       }
       setPhotoUrls(urls);
     }

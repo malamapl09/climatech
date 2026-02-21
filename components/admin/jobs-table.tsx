@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import type { Job } from "@/types";
@@ -59,20 +58,15 @@ export function JobsTable({ jobs }: { jobs: TableJob[] }) {
                 style={{ borderBottom: "1px solid #F3F4F6" }}
               >
                 <td className="px-3 py-3">
-                  <Link
-                    href={`/admin/trabajos`}
-                    className="no-underline"
+                  <div className="text-[13px] font-semibold text-gray-900">
+                    {job.client_name}
+                  </div>
+                  <div
+                    className="mt-0.5 max-w-[200px] truncate text-[11px]"
+                    style={{ color: "#9CA3AF" }}
                   >
-                    <div className="text-[13px] font-semibold text-gray-900">
-                      {job.client_name}
-                    </div>
-                    <div
-                      className="mt-0.5 max-w-[200px] truncate text-[11px]"
-                      style={{ color: "#9CA3AF" }}
-                    >
-                      {job.address}
-                    </div>
-                  </Link>
+                    {job.address}
+                  </div>
                 </td>
                 <td className="px-3 py-3">
                   <ServiceTypeBadge type={job.service_type} />

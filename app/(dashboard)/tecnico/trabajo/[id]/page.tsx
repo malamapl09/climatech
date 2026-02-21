@@ -30,7 +30,12 @@ export default async function TechnicianJobPage({
 
   if (!job) notFound();
 
-  const activityLog = await getActivityLog(id);
+  let activityLog: Awaited<ReturnType<typeof getActivityLog>> = [];
+  try {
+    activityLog = await getActivityLog(id);
+  } catch {
+    // Activity log is non-critical — render page without it
+  }
 
   return <JobExecution job={job} activityLog={activityLog} />;
 }

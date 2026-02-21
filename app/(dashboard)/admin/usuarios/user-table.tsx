@@ -30,9 +30,9 @@ export function UserTable({ users }: { users: UserWithSupervisor[] }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 dark:bg-gray-900">
+        <thead className="bg-gray-50">
           <tr>
             <th className="px-4 py-3 text-left font-medium">Nombre</th>
             <th className="px-4 py-3 text-left font-medium">Email</th>
@@ -43,7 +43,7 @@ export function UserTable({ users }: { users: UserWithSupervisor[] }) {
             <th className="px-4 py-3 text-left font-medium">Acciones</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody className="divide-y divide-gray-200 bg-white">
           {users.map((user) => (
             <tr key={user.id}>
               <td className="px-4 py-3 font-medium">{user.full_name}</td>

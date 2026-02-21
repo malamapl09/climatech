@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { Plus, AlertTriangle } from "lucide-react";
 import { Button, useOverlayState } from "@heroui/react";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -195,13 +194,9 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
                 />
 
                 {jobs.map((job, i) => (
-                  <Link
-                    key={job.id}
-                    href={`/operaciones/rutas/${route.id}`}
-                    className="no-underline"
-                  >
                     <div
-                      className="relative flex cursor-pointer gap-4 rounded-xl p-3 transition-colors"
+                      key={job.id}
+                      className="relative flex gap-4 rounded-xl p-3 transition-colors"
                       style={{
                         marginBottom: i < jobs.length - 1 ? 6 : 0,
                         background:
@@ -273,7 +268,6 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
                         </div>
                       </div>
                     </div>
-                  </Link>
                 ))}
               </div>
             )}

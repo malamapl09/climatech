@@ -16,13 +16,16 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
     const newUrls: Record<string, string> = {};
 
     async function loadUrls() {
-      for (const photo of photos) {
-        const { data } = await supabase.storage
-          .from("job-photos")
-          .createSignedUrl(photo.storage_path, 3600);
-        if (data?.signedUrl) {
-          newUrls[photo.id] = data.signedUrl;
-        }
+      const results = await Promise.all(
+        photos.map((photo) =>
+          supabase.storage
+            .from("job-photos")
+            .createSignedUrl(photo.storage_path, 3600)
+            .then(({ data }) => ({ id: photo.id, url: data?.signedUrl }))
+        )
+      );
+      for (const r of results) {
+        if (r.url) newUrls[r.id] = r.url;
       }
       setUrls(newUrls);
     }
@@ -41,8 +44,8 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
           key={photo.id}
           className={`overflow-hidden rounded-lg border ${
             photo.status === "rejected"
-              ? "border-red-300 dark:border-red-800"
-              : "border-gray-200 dark:border-gray-800"
+              ? "border-red-300"
+              : "border-gray-200"
           }`}
         >
           {urls[photo.id] ? (
@@ -52,8 +55,8 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
               className="h-32 w-full object-cover"
             />
           ) : (
-            <div className="flex h-32 items-center justify-center bg-gray-100 dark:bg-gray-900">
-              <div className="h-6 w-6 animate-pulse rounded-full bg-gray-300 dark:bg-gray-700" />
+            <div className="flex h-32 items-center justify-center bg-gray-100">
+              <div className="h-6 w-6 animate-pulse rounded-full bg-gray-300" />
             </div>
           )}
           <div className="p-2">
@@ -67,7 +70,7 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
               </span>
             </div>
             {photo.status === "rejected" && photo.reject_reason && (
-              <div className="mt-1 flex items-start gap-1 rounded bg-red-50 p-1.5 text-xs text-red-600 dark:bg-red-950 dark:text-red-400">
+              <div className="mt-1 flex items-start gap-1 rounded bg-red-50 p-1.5 text-xs text-red-600">
                 <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                 <span>{photo.reject_reason}</span>
               </div>

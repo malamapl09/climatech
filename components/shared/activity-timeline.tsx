@@ -30,39 +30,34 @@ export function ActivityTimeline({ entries }: { entries: ActivityEntry[] }) {
   }
 
   return (
-    <div
-      className="rounded-[14px] bg-white p-5"
-      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
-    >
-      <div className="relative">
-        {/* Vertical line */}
-        <div
-          className="absolute bottom-2 top-2 w-0.5"
-          style={{ left: 7, background: "#E5E7EB" }}
-        />
+    <div className="relative">
+      {/* Vertical line */}
+      <div
+        className="absolute bottom-2 top-2 w-0.5"
+        style={{ left: 7, background: "#E5E7EB" }}
+      />
 
-        {entries.map((entry, i) => (
+      {entries.map((entry, i) => (
+        <div
+          key={entry.id}
+          className="relative flex gap-3.5"
+          style={{ marginBottom: i < entries.length - 1 ? 16 : 0 }}
+        >
           <div
-            key={entry.id}
-            className="relative flex gap-3.5"
-            style={{ marginBottom: i < entries.length - 1 ? 16 : 0 }}
-          >
-            <div
-              className="z-10 mt-0.5 h-4 w-4 shrink-0 rounded-full"
-              style={{ background: TYPE_COLORS[entry.type] || "#D1D5DB" }}
-            />
-            <div>
-              <div className="text-[13px] font-semibold text-gray-900">
-                {entry.action}
-              </div>
-              <div className="mt-0.5 text-[11px]" style={{ color: "#9CA3AF" }}>
-                {formatRelative(entry.created_at)} &middot;{" "}
-                {entry.performer?.full_name || "Sistema"}
-              </div>
+            className="z-10 mt-0.5 h-4 w-4 shrink-0 rounded-full"
+            style={{ background: TYPE_COLORS[entry.type] || "#D1D5DB" }}
+          />
+          <div>
+            <div className="text-[13px] font-semibold text-gray-900">
+              {entry.action}
+            </div>
+            <div className="mt-0.5 text-[11px]" style={{ color: "#9CA3AF" }}>
+              {formatRelative(entry.created_at)} &middot;{" "}
+              {entry.performer?.full_name || "Sistema"}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

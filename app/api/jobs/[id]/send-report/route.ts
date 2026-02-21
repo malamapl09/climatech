@@ -63,19 +63,20 @@ export async function POST(
   const approvedPhotos = (job.photos || []).filter(
     (p: { status: string }) => p.status === "approved"
   );
-  const photoData: { url: string; description: string }[] = [];
-
-  for (const photo of approvedPhotos) {
-    const { data } = await supabase.storage
-      .from("job-photos")
-      .createSignedUrl(photo.storage_path, 60 * 60 * 24 * 30); // 30 days
-    if (data?.signedUrl) {
-      photoData.push({
-        url: data.signedUrl,
-        description: photo.description,
-      });
-    }
-  }
+  const photoResults = await Promise.all(
+    approvedPhotos.map((photo: { storage_path: string; description: string }) =>
+      supabase.storage
+        .from("job-photos")
+        .createSignedUrl(photo.storage_path, 60 * 60 * 24 * 30) // 30 days
+        .then(({ data }) => ({
+          url: data?.signedUrl,
+          description: photo.description,
+        }))
+    )
+  );
+  const photoData = photoResults.filter(
+    (p): p is { url: string; description: string } => !!p.url
+  );
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const reportUrl = `${appUrl}/api/reporte/${reportToken}`;
@@ -118,6 +119,11 @@ export async function POST(
       html,
     });
   } catch (err) {
+    // Rollback status on email failure so supervisor can retry
+    await supabase
+      .from("jobs")
+      .update({ status: "approved", report_sent: false })
+      .eq("id", id);
     return NextResponse.json(
       { error: `Error enviando email: ${err instanceof Error ? err.message : "desconocido"}` },
       { status: 500 }

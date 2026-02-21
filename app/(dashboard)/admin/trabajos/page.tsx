@@ -113,7 +113,7 @@ function Pagination({
       {currentPage > 1 && (
         <a
           href={buildUrl(currentPage - 1)}
-          className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+          className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100"
         >
           Anterior
         </a>
@@ -124,7 +124,7 @@ function Pagination({
       {currentPage < totalPages && (
         <a
           href={buildUrl(currentPage + 1)}
-          className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-900"
+          className="rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-100"
         >
           Siguiente
         </a>

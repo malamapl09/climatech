@@ -3,40 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import {
-  Map,
-  Wrench,
-  ClipboardCheck,
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  Bell,
-} from "lucide-react";
+import { navByRole } from "./nav-config";
 import type { UserRole } from "@/types";
-
-const navByRole: Record<
-  UserRole,
-  { label: string; href: string; icon: React.ReactNode }[]
-> = {
-  operations: [
-    { label: "Operaciones", href: "/operaciones", icon: <Map className="h-5 w-5" /> },
-    { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
-  ],
-  technician: [
-    { label: "Mi Ruta", href: "/tecnico", icon: <Wrench className="h-5 w-5" /> },
-    { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
-  ],
-  supervisor: [
-    { label: "Supervisor", href: "/supervisor", icon: <ClipboardCheck className="h-5 w-5" /> },
-    { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
-  ],
-  admin: [
-    { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="h-5 w-5" /> },
-    { label: "Trabajos", href: "/admin/trabajos", icon: <Briefcase className="h-5 w-5" /> },
-    { label: "Usuarios", href: "/admin/usuarios", icon: <Users className="h-5 w-5" /> },
-    { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
-  ],
-};
 
 export function MobileNav({
   role,

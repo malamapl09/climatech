@@ -204,8 +204,8 @@ export function StopForm({
 
   // ── Shared input class ───────────────────────────────────────────────────────
   const inputCls =
-    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100";
-  const labelCls = "block text-sm font-medium text-gray-700 dark:text-gray-300";
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+  const labelCls = "block text-sm font-medium text-gray-700";
 
   return (
     <Modal state={modalState}>
@@ -223,7 +223,7 @@ export function StopForm({
                 {error && (
                   <p
                     role="alert"
-                    className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-400"
+                    className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
                   >
                     {error}
                   </p>
@@ -231,7 +231,7 @@ export function StopForm({
 
                 {/* ── Client info ── */}
                 <fieldset>
-                  <legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Datos del cliente
                   </legend>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -305,7 +305,7 @@ export function StopForm({
 
                 {/* ── Service info ── */}
                 <fieldset>
-                  <legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     Datos del servicio
                   </legend>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -405,7 +405,7 @@ export function StopForm({
                 {/* ── Materials ── */}
                 <fieldset>
                   <div className="mb-3 flex items-center justify-between">
-                    <legend className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    <legend className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                       Materiales
                     </legend>
                     <Button
@@ -422,7 +422,7 @@ export function StopForm({
                   </div>
 
                   {materials.length === 0 ? (
-                    <p className="text-center text-xs text-gray-400 dark:text-gray-600">
+                    <p className="text-center text-xs text-gray-400">
                       Sin materiales. Usa el boton para agregar.
                     </p>
                   ) : (
@@ -436,10 +436,10 @@ export function StopForm({
                         className="hidden grid-cols-[1fr_6rem_2rem] gap-2 sm:grid"
                         aria-hidden="true"
                       >
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span className="text-xs font-medium text-gray-500">
                           Material
                         </span>
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <span className="text-xs font-medium text-gray-500">
                           Cantidad
                         </span>
                       </div>
@@ -478,7 +478,7 @@ export function StopForm({
                             type="button"
                             onClick={() => removeMaterialRow(m.id)}
                             aria-label={`Eliminar material ${idx + 1}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                           >
                             <Trash2 className="h-4 w-4" aria-hidden="true" />
                           </button>

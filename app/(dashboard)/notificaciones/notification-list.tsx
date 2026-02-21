@@ -16,7 +16,7 @@ import Link from "next/link";
 import { markAsRead, markAllAsRead } from "@/lib/actions/notifications";
 import { formatRelative } from "@/lib/utils/date";
 import { toast } from "sonner";
-import type { Notification, NotificationType } from "@/types";
+import type { Notification, NotificationType, UserRole } from "@/types";
 
 const typeIcons: Record<NotificationType, React.ReactNode> = {
   route_published: <Map className="h-5 w-5 text-blue-500" />,
@@ -27,10 +27,19 @@ const typeIcons: Record<NotificationType, React.ReactNode> = {
   report_sent: <Send className="h-5 w-5 text-teal-500" />,
 };
 
+const JOB_PATH_BY_ROLE: Record<UserRole, string> = {
+  technician: "/tecnico/trabajo",
+  supervisor: "/supervisor/trabajo",
+  operations: "/operaciones",
+  admin: "/admin/trabajos",
+};
+
 export function NotificationList({
   notifications,
+  userRole,
 }: {
   notifications: Notification[];
+  userRole: UserRole;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -80,7 +89,7 @@ export function NotificationList({
       )}
 
       {notifications.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
           <p className="text-gray-500">No tienes notificaciones.</p>
         </div>
       ) : (
@@ -99,7 +108,7 @@ export function NotificationList({
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-medium">{n.title}</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {n.message}
                         </p>
                       </div>
@@ -108,8 +117,8 @@ export function NotificationList({
                       </span>
                     </div>
                     <div className="mt-2 flex gap-2">
-                      {n.job_id && (
-                        <Link href={`/supervisor/trabajo/${n.job_id}`}>
+                      {n.job_id && JOB_PATH_BY_ROLE[userRole] !== "/operaciones" && JOB_PATH_BY_ROLE[userRole] !== "/admin/trabajos" && (
+                        <Link href={`${JOB_PATH_BY_ROLE[userRole]}/${n.job_id}`}>
                           <Button variant="ghost" size="sm">
                             Ver trabajo
                           </Button>

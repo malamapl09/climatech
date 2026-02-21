@@ -34,7 +34,7 @@ export default function LoginPage() {
       <Card.Content>
         <form action={handleSubmit} className="flex flex-col gap-4">
           {error && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
               {error}
             </div>
           )}

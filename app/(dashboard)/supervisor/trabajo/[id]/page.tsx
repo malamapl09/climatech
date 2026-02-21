@@ -31,7 +31,12 @@ export default async function SupervisorJobPage({
 
   if (!job) notFound();
 
-  const activityLog = await getActivityLog(id);
+  let activityLog: Awaited<ReturnType<typeof getActivityLog>> = [];
+  try {
+    activityLog = await getActivityLog(id);
+  } catch {
+    // Activity log is non-critical — render page without it
+  }
 
   return <JobReview job={job} activityLog={activityLog} />;
 }

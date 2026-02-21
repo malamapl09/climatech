@@ -47,7 +47,7 @@ export function JobsFilters({
           Estado
         </label>
         <select
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.status || ""}
           onChange={(e) => updateFilter("status", e.target.value)}
         >
@@ -65,7 +65,7 @@ export function JobsFilters({
           Tecnico
         </label>
         <select
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.technician || ""}
           onChange={(e) => updateFilter("technician", e.target.value)}
         >
@@ -83,7 +83,7 @@ export function JobsFilters({
           Supervisor
         </label>
         <select
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.supervisor || ""}
           onChange={(e) => updateFilter("supervisor", e.target.value)}
         >
@@ -101,7 +101,7 @@ export function JobsFilters({
           Tipo
         </label>
         <select
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.service_type || ""}
           onChange={(e) => updateFilter("service_type", e.target.value)}
         >
@@ -120,7 +120,7 @@ export function JobsFilters({
         </label>
         <input
           type="date"
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.date_from || ""}
           onChange={(e) => updateFilter("date_from", e.target.value)}
         />
@@ -132,7 +132,7 @@ export function JobsFilters({
         </label>
         <input
           type="date"
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           value={currentFilters.date_to || ""}
           onChange={(e) => updateFilter("date_to", e.target.value)}
         />

@@ -70,7 +70,7 @@ export function UserForm({ user, supervisors, mode }: UserFormProps) {
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -114,7 +114,7 @@ export function UserForm({ user, supervisors, mode }: UserFormProps) {
             <label className="mb-1 block text-sm font-medium">Rol</label>
             <select
               name="role"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               defaultValue={user?.role || "technician"}
               required
             >
@@ -139,7 +139,7 @@ export function UserForm({ user, supervisors, mode }: UserFormProps) {
             </label>
             <select
               name="supervisor_id"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
               defaultValue={user?.supervisor_id || ""}
             >
               <option value="">Sin supervisor</option>
