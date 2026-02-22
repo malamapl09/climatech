@@ -51,7 +51,7 @@ Operations          Technician           Supervisor            Client
 | **operations** | `/operaciones` | Create routes, assign technicians + supervisors, add stops with client/equipment/materials, publish routes |
 | **technician** | `/tecnico` | View daily route, start/complete jobs, upload photo evidence (with GPS), check off materials |
 | **supervisor** | `/supervisor` | Review photo evidence (approve/reject each), approve/reject jobs, add observations, send client report |
-| **admin** | `/admin` | Dashboard metrics, manage all jobs, create/edit users, assign roles + supervisors |
+| **admin** | `/admin` | Dashboard (KPIs, routes summary, service type chart, technician progress, attention queue, activity feed), manage all jobs, create/edit users, assign roles + supervisors |
 
 ## Project Structure
 
@@ -73,7 +73,7 @@ app/
 │   │   ├── page.tsx                        # Review queue
 │   │   └── trabajo/[id]/                   # Photo + job review
 │   ├── admin/
-│   │   ├── page.tsx                        # KPI dashboard
+│   │   ├── page.tsx                        # Admin command center (KPIs, routes, progress, alerts, activity)
 │   │   ├── trabajos/page.tsx               # All jobs + filters
 │   │   └── usuarios/                       # User management
 │   └── notificaciones/page.tsx             # All roles
@@ -91,7 +91,7 @@ components/
 ├── operations/      # RoutePlanner, RouteCard, StopForm
 ├── technician/      # RouteList, PhotoUpload, PhotoGrid, MaterialsList
 ├── supervisor/      # ReviewQueue, PhotoReviewCard, JobApprovalForm, ReportPreview
-├── admin/           # DashboardStats, JobsTable, JobsFilters, UserForm
+├── admin/           # DashboardStats, RoutesSummary, ServiceTypeChart, TechnicianProgress, AttentionRequired, ActivityFeed, JobsTable, JobsFilters, UserForm
 └── shared/          # StatusBadge, ServiceTypeBadge, PhotoStatusBadge, WorkflowStepper, ActivityTimeline, FormField, NotificationBell
 
 lib/

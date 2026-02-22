@@ -44,3 +44,35 @@ export async function getActivityLog(jobId: string) {
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function getRecentActivity(limit = 10) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("No autenticado");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") throw new Error("No autorizado");
+
+  const safeLimit = Math.max(1, Math.min(limit, 100));
+
+  const { data, error } = await supabase
+    .from("activity_log")
+    .select(`
+      id, action, type, created_at,
+      performer:profiles!activity_log_performed_by_fkey(id, full_name),
+      job:jobs!activity_log_job_id_fkey(id, client_name)
+    `)
+    .order("created_at", { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw new Error(error.message);
+  return data;
+}
