@@ -5,16 +5,24 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button, Modal, useOverlayState } from "@heroui/react";
 import { createRoute } from "@/lib/actions/routes";
+import { reassignJob } from "@/lib/actions/reassign-job";
 import { createClient } from "@/lib/supabase/client";
 import { RouteCard } from "@/components/operations/route-card";
-import type { Profile, RouteWithJobs } from "@/types";
+import { OverdueJobsBanner } from "@/components/shared/overdue-jobs-banner";
+import { todayISO } from "@/lib/utils/date";
+import type { OverdueJob, Profile, RouteWithJobs } from "@/types";
 
 interface RoutePlannerProps {
   initialRoutes: RouteWithJobs[];
   initialDate: string;
+  overdueJobs?: OverdueJob[];
 }
 
-export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) {
+export function RoutePlanner({
+  initialRoutes,
+  initialDate,
+  overdueJobs = [],
+}: RoutePlannerProps) {
   const router = useRouter();
   const [routes, setRoutes] = useState<RouteWithJobs[]>(initialRoutes);
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -28,6 +36,14 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
   const modalState = useOverlayState();
   const hasFetchedTechs = useRef(false);
 
+  // Reassign modal state
+  const reassignModalState = useOverlayState();
+  const [reassignJobId, setReassignJobId] = useState<string | null>(null);
+  const [reassignDate, setReassignDate] = useState(todayISO());
+  const [reassignTechId, setReassignTechId] = useState("");
+  const [reassignError, setReassignError] = useState<string | null>(null);
+  const [isReassigning, startReassign] = useTransition();
+
   useEffect(() => {
     setRoutes(initialRoutes);
   }, [initialRoutes]);
@@ -37,7 +53,8 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
   }, [initialDate]);
 
   useEffect(() => {
-    if (!modalState.isOpen || hasFetchedTechs.current) return;
+    const anyOpen = modalState.isOpen || reassignModalState.isOpen;
+    if (!anyOpen || hasFetchedTechs.current) return;
     hasFetchedTechs.current = true;
 
     const supabase = createClient();
@@ -56,7 +73,7 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
           (data ?? []) as Pick<Profile, "id" | "full_name" | "zone">[]
         );
       });
-  }, [modalState.isOpen]);
+  }, [modalState.isOpen, reassignModalState.isOpen]);
 
   // Filter out technicians who already have a route on the selected date
   const assignedTechIds = useMemo(
@@ -76,6 +93,38 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
       setSelectedTechId("");
     }
   }, [availableTechnicians, selectedTechId, technicians.length]);
+
+  function openReassignModal(jobId: string) {
+    setReassignJobId(jobId);
+    setReassignDate(todayISO());
+    setReassignTechId("");
+    setReassignError(null);
+    reassignModalState.open();
+  }
+
+  function handleReassign() {
+    if (!reassignJobId || !reassignTechId) {
+      setReassignError("Selecciona un tecnico.");
+      return;
+    }
+    setReassignError(null);
+
+    startReassign(async () => {
+      try {
+        await reassignJob({
+          jobId: reassignJobId,
+          targetDate: reassignDate,
+          targetTechnicianId: reassignTechId,
+        });
+        reassignModalState.close();
+        router.refresh();
+      } catch (err: unknown) {
+        setReassignError(
+          err instanceof Error ? err.message : "No se pudo reprogramar."
+        );
+      }
+    });
+  }
 
   function handleDateChange(e: React.ChangeEvent<HTMLInputElement>) {
     const next = e.target.value;
@@ -160,6 +209,24 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
 
   return (
     <div className="space-y-6">
+      {/* Overdue Jobs Banner */}
+      {overdueJobs.length > 0 && (
+        <OverdueJobsBanner
+          jobs={overdueJobs}
+          basePath="/operaciones/trabajo"
+          showTechnician
+          actionSlot={(job) => (
+            <button
+              onClick={() => openReassignModal(job.id)}
+              className="rounded-md px-2.5 py-1 text-xs font-semibold text-white"
+              style={{ background: "#D97706" }}
+            >
+              Reprogramar
+            </button>
+          )}
+        />
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {kpis.map((s, i) => (
@@ -320,6 +387,92 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
                   isDisabled={isPending || !selectedTechId}
                 >
                   {isPending ? "Creando..." : "Crear Ruta"}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      {/* Reassign Job Modal */}
+      <Modal state={reassignModalState}>
+        <Modal.Backdrop isDismissable>
+          <Modal.Container size="sm">
+            <Modal.Dialog>
+              <Modal.Header>
+                <Modal.Heading>Reprogramar Trabajo</Modal.Heading>
+                <Modal.CloseTrigger />
+              </Modal.Header>
+
+              <Modal.Body className="space-y-4">
+                {reassignError && (
+                  <p role="alert" className="text-sm text-red-600">
+                    {reassignError}
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="reassign-date"
+                    className="text-sm font-medium"
+                    style={{ color: "#374151" }}
+                  >
+                    Nueva fecha *
+                  </label>
+                  <input
+                    id="reassign-date"
+                    type="date"
+                    value={reassignDate}
+                    min={todayISO()}
+                    onChange={(e) => setReassignDate(e.target.value)}
+                    className={inputCls}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="reassign-tech"
+                    className="text-sm font-medium"
+                    style={{ color: "#374151" }}
+                  >
+                    Tecnico *
+                  </label>
+                  <select
+                    id="reassign-tech"
+                    value={reassignTechId}
+                    onChange={(e) => setReassignTechId(e.target.value)}
+                    required
+                    className={inputCls}
+                  >
+                    <option value="" disabled>
+                      {technicians.length === 0
+                        ? "Cargando tecnicos..."
+                        : "Selecciona un tecnico"}
+                    </option>
+                    {technicians.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.full_name}
+                        {t.zone ? ` — ${t.zone}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </Modal.Body>
+
+              <Modal.Footer className="gap-2">
+                <Button
+                  variant="outline"
+                  onPress={reassignModalState.close}
+                  isDisabled={isReassigning}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  onPress={handleReassign}
+                  isDisabled={isReassigning || !reassignTechId}
+                >
+                  {isReassigning ? "Reprogramando..." : "Reprogramar"}
                 </Button>
               </Modal.Footer>
             </Modal.Dialog>

@@ -50,4 +50,5 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   job_rejected: "Trabajo rechazado",
   job_approved: "Trabajo aprobado",
   report_sent: "Reporte enviado",
+  job_overdue: "Trabajo vencido",
 };

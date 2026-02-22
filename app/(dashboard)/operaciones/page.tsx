@@ -1,4 +1,6 @@
 import { getRoutesForDate } from "@/lib/actions/routes";
+import { getAllOverdueJobs } from "@/lib/actions/jobs";
+import { checkOverdueJobs } from "@/lib/actions/check-overdue";
 import { todayISO } from "@/lib/utils/date";
 import { RoutePlanner } from "@/components/operations/route-planner";
 
@@ -9,14 +11,22 @@ export default async function OperationsPage({
 }) {
   const params = await searchParams;
   const date = params.date || todayISO();
-  const routes = await getRoutesForDate(date);
+  const [routes, overdueJobs] = await Promise.all([
+    getRoutesForDate(date),
+    getAllOverdueJobs(),
+    checkOverdueJobs(),
+  ]);
 
   return (
     <div>
       <h1 className="mb-6 text-[22px] font-extrabold text-gray-900">
         Centro de Operaciones
       </h1>
-      <RoutePlanner initialRoutes={routes} initialDate={date} />
+      <RoutePlanner
+        initialRoutes={routes}
+        initialDate={date}
+        overdueJobs={overdueJobs}
+      />
     </div>
   );
 }

@@ -203,6 +203,8 @@ Located in `lib/actions/`. Called from Server Components and Client Components.
 | `createJob(data)` | `Job` | Creates job with `status = "scheduled"` |
 | `updateJob(id, data)` | `Job` | Whitelisted fields only |
 | `deleteJob(id)` | `void` | Cascades to photos, materials, log |
+| `getOverdueJobsForTechnician(userId)` | `OverdueJob[]` | Jobs with status scheduled/in_progress and route date < today (90-day lookback, limit 200) |
+| `getAllOverdueJobs()` | `OverdueJob[]` | Same as above but across all technicians, includes technician name |
 
 ### clients.ts
 
@@ -226,6 +228,18 @@ Located in `lib/actions/`. Called from Server Components and Client Components.
 |---|---|---|
 | `logActivity({ jobId, action, details, type })` | `void` | Insert log entry with current user |
 | `getActivityLog(jobId)` | `ActivityEntry[]` | Entries with performer name, sorted by date |
+
+### reassign-job.ts
+
+| Function | Returns | Description |
+|---|---|---|
+| `reassignJob({ jobId, targetDate, targetTechnicianId })` | `void` | Moves overdue job to new date/technician. Finds or creates target route, resets status to `scheduled`, logs activity. Auth: operations/admin only. |
+
+### check-overdue.ts
+
+| Function | Returns | Description |
+|---|---|---|
+| `checkOverdueJobs()` | `void` | Non-throwing. Finds overdue jobs, deduplicates against existing `job_overdue` notifications, batch-inserts alerts for all operations + admin users. Called from operations page (awaited) and admin page (fire-and-forget). |
 
 ### notifications.ts
 

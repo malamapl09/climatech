@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { todayISO } from "@/lib/utils/date";
 import { RouteList } from "@/components/technician/route-list";
+import { getOverdueJobsForTechnician } from "@/lib/actions/jobs";
+import { OverdueJobsBanner } from "@/components/shared/overdue-jobs-banner";
 
 export default async function TechnicianPage() {
   const supabase = await createClient();
@@ -13,7 +15,7 @@ export default async function TechnicianPage() {
 
   const today = todayISO();
 
-  const [{ data: route }, { data: profile }] = await Promise.all([
+  const [{ data: route }, { data: profile }, overdueJobs] = await Promise.all([
     supabase
       .from("routes")
       .select(
@@ -28,12 +30,21 @@ export default async function TechnicianPage() {
       .select("full_name")
       .eq("id", user.id)
       .single(),
+    getOverdueJobsForTechnician(user.id),
   ]);
 
   const userName = profile?.full_name ?? "Tecnico";
 
   return (
     <div>
+      {overdueJobs.length > 0 && (
+        <div className="mb-4">
+          <OverdueJobsBanner
+            jobs={overdueJobs}
+            basePath="/tecnico/trabajo"
+          />
+        </div>
+      )}
       {route ? (
         <RouteList route={route} userName={userName} />
       ) : (

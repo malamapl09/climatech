@@ -12,7 +12,7 @@ job_status:        'scheduled' | 'in_progress' | 'supervisor_review' | 'approved
 photo_status:      'pending' | 'approved' | 'rejected'
 service_type:      'installation' | 'maintenance' | 'repair'
 activity_type:     'status_change' | 'photo_upload' | 'photo_review' | 'note' | 'report' | 'assignment'
-notification_type: 'route_published' | 'job_ready_for_review' | 'photo_rejected' | 'job_rejected' | 'job_approved' | 'report_sent'
+notification_type: 'route_published' | 'job_ready_for_review' | 'photo_rejected' | 'job_rejected' | 'job_approved' | 'report_sent' | 'job_overdue'
 ```
 
 ## Tables

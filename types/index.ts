@@ -31,7 +31,8 @@ export type NotificationType =
   | "photo_rejected"
   | "job_rejected"
   | "job_approved"
-  | "report_sent";
+  | "report_sent"
+  | "job_overdue";
 
 // ── Database row types ──
 export interface Profile {
@@ -167,6 +168,12 @@ export interface JobWithDetails extends Job {
 
 export interface ActivityLogWithPerformer extends ActivityLog {
   performer: Pick<Profile, "id" | "full_name"> | null;
+}
+
+// ── Overdue job (for banners) ──
+export interface OverdueJob extends Job {
+  route: Pick<Route, "id" | "date">;
+  technician?: Pick<Profile, "id" | "full_name">;
 }
 
 // ── Nav ──

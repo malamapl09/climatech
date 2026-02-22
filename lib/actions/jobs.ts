@@ -1,7 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { Job, JobWithDetails, JobWithPhotos, ServiceType } from "@/types";
+import { todayISO, formatDateISO } from "@/lib/utils/date";
+import { subDays } from "date-fns";
+import type { Job, JobWithDetails, JobWithPhotos, OverdueJob, ServiceType } from "@/types";
+
+/** Only look back 90 days for overdue jobs — prevents unbounded growth. */
+const OVERDUE_LOOKBACK_DAYS = 90;
 
 /**
  * Returns all jobs belonging to a route, ordered by `route_order` ascending.
@@ -165,6 +170,62 @@ export async function updateJob(
   if (error) throw new Error(error.message);
 
   return updated as Job;
+}
+
+/**
+ * Returns overdue jobs for a specific technician.
+ * "Overdue" = status is scheduled or in_progress AND route date < today.
+ */
+export async function getOverdueJobsForTechnician(
+  userId: string
+): Promise<OverdueJob[]> {
+  const supabase = await createClient();
+  const today = todayISO();
+  const floor = formatDateISO(subDays(new Date(), OVERDUE_LOOKBACK_DAYS));
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .select(
+      `
+      *,
+      route:routes!jobs_route_id_fkey(id, date)
+      `
+    )
+    .eq("technician_id", userId)
+    .in("status", ["scheduled", "in_progress"])
+    .gte("created_at", `${floor}T00:00:00`)
+    .limit(200);
+
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as OverdueJob[]).filter((j) => j.route.date < today);
+}
+
+/**
+ * Returns ALL overdue jobs (across all technicians).
+ * Used by operations/admin banners.
+ */
+export async function getAllOverdueJobs(): Promise<OverdueJob[]> {
+  const supabase = await createClient();
+  const today = todayISO();
+  const floor = formatDateISO(subDays(new Date(), OVERDUE_LOOKBACK_DAYS));
+
+  const { data, error } = await supabase
+    .from("jobs")
+    .select(
+      `
+      *,
+      route:routes!jobs_route_id_fkey(id, date),
+      technician:profiles!jobs_technician_id_fkey(id, full_name)
+      `
+    )
+    .in("status", ["scheduled", "in_progress"])
+    .gte("created_at", `${floor}T00:00:00`)
+    .limit(200);
+
+  if (error) throw new Error(error.message);
+
+  return ((data ?? []) as OverdueJob[]).filter((j) => j.route.date < today);
 }
 
 /**
