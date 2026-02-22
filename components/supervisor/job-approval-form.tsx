@@ -82,7 +82,7 @@ export function JobApprovalForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Escriba sus observaciones sobre el trabajo..."
-            className="w-full resize-y rounded-[10px] p-3 text-sm outline-none"
+            className="w-full resize-y rounded-[10px] p-3 text-base outline-none"
             style={{
               border: "2px solid #BAE6FD",
               minHeight: 70,
@@ -102,7 +102,7 @@ export function JobApprovalForm({
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Motivo del rechazo del trabajo..."
-              className="w-full resize-y rounded-lg p-2.5 text-[13px] outline-none"
+              className="w-full resize-y rounded-lg p-2.5 text-base outline-none"
               style={{
                 border: "2px solid #FECACA",
                 minHeight: 50,
@@ -114,14 +114,14 @@ export function JobApprovalForm({
               <button
                 onClick={handleReject}
                 disabled={loading || !rejectReason.trim()}
-                className="cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
+                className="min-h-[44px] cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
                 style={{ background: "#DC2626" }}
               >
                 Confirmar Rechazo
               </button>
               <button
                 onClick={() => setShowReject(false)}
-                className="cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
+                className="min-h-[44px] cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
                 style={{
                   border: "1px solid #E5E7EB",
                   background: "#fff",
@@ -137,7 +137,7 @@ export function JobApprovalForm({
             <button
               onClick={handleApprove}
               disabled={loading}
-              className="flex-1 cursor-pointer rounded-[10px] border-none py-3 text-sm font-bold text-white"
+              className="min-h-[44px] flex-1 cursor-pointer rounded-[10px] border-none py-3 text-sm font-bold text-white"
               style={{
                 background: "linear-gradient(135deg, #059669, #047857)",
                 boxShadow: "0 4px 12px rgba(5,150,105,0.3)",
@@ -148,7 +148,7 @@ export function JobApprovalForm({
             <button
               onClick={() => setShowReject(true)}
               disabled={loading}
-              className="cursor-pointer rounded-[10px] bg-transparent px-5 py-3 text-[13px] font-bold"
+              className="min-h-[44px] cursor-pointer rounded-[10px] bg-transparent px-5 py-3 text-[13px] font-bold"
               style={{ border: "2px solid #DC2626", color: "#DC2626" }}
             >
               ✗ Rechazar
@@ -189,7 +189,7 @@ export function JobApprovalForm({
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             placeholder="Motivo del rechazo del trabajo..."
-            className="w-full resize-y rounded-lg p-2.5 text-[13px] outline-none"
+            className="w-full resize-y rounded-lg p-2.5 text-base outline-none"
             style={{
               border: "2px solid #FECACA",
               minHeight: 50,
@@ -201,14 +201,14 @@ export function JobApprovalForm({
             <button
               onClick={handleReject}
               disabled={loading || !rejectReason.trim()}
-              className="cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
+              className="min-h-[44px] cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
               style={{ background: "#DC2626" }}
             >
               Confirmar Rechazo
             </button>
             <button
               onClick={() => setShowReject(false)}
-              className="cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
+              className="min-h-[44px] cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
               style={{
                 border: "1px solid #E5E7EB",
                 background: "#fff",
@@ -223,7 +223,7 @@ export function JobApprovalForm({
         <button
           onClick={() => setShowReject(true)}
           disabled={loading}
-          className="w-full cursor-pointer rounded-[10px] bg-transparent px-5 py-2.5 text-[13px] font-bold"
+          className="min-h-[44px] w-full cursor-pointer rounded-[10px] bg-transparent px-5 py-2.5 text-[13px] font-bold"
           style={{ border: "2px solid #DC2626", color: "#DC2626" }}
         >
           ✗ Rechazar Trabajo Completo

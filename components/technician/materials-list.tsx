@@ -41,24 +41,26 @@ export function MaterialsList({
       {materials.map((m) => {
         const isChecked = checkedState[m.id] ?? m.checked;
         return (
-          <li key={m.id} className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={() => toggleChecked(m.id)}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            <span
-              className={`text-sm ${isChecked ? "line-through" : ""}`}
-              style={{ color: isChecked ? "#9CA3AF" : "#374151" }}
-            >
-              {m.name}
-            </span>
-            {m.quantity > 1 && (
-              <span className="text-xs" style={{ color: "#9CA3AF" }}>
-                x{m.quantity}
+          <li key={m.id}>
+            <label className="flex items-center gap-3 py-1">
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => toggleChecked(m.id)}
+                className="h-5 w-5 shrink-0 rounded border-gray-300"
+              />
+              <span
+                className={`text-sm ${isChecked ? "line-through" : ""}`}
+                style={{ color: isChecked ? "#9CA3AF" : "#374151" }}
+              >
+                {m.name}
               </span>
-            )}
+              {m.quantity > 1 && (
+                <span className="shrink-0 text-xs" style={{ color: "#9CA3AF" }}>
+                  x{m.quantity}
+                </span>
+              )}
+            </label>
           </li>
         );
       })}

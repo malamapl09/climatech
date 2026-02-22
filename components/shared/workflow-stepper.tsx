@@ -37,7 +37,7 @@ export function WorkflowStepper({ status }: { status: JobStatus }) {
                 {active ? step.icon : i + 1}
               </div>
               <span
-                className="max-w-[70px] text-center text-[9px] font-semibold leading-tight"
+                className="max-w-[70px] text-center text-[10px] font-semibold leading-tight"
                 style={{ color: active ? "#1E3A5F" : "#9CA3AF" }}
               >
                 {step.label}

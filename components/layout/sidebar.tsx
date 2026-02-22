@@ -21,7 +21,7 @@ export function Sidebar({ role }: { role: UserRole }) {
         </div>
         <div>
           <div className="text-[15px] font-extrabold text-gray-900">ClimaTech</div>
-          <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>
+          <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>
             Gestion de Campo
           </div>
         </div>

@@ -59,7 +59,7 @@ export function OverdueJobsBanner({
             >
               <Link
                 href={`${basePath}/${job.id}`}
-                className="font-medium hover:underline"
+                className="-my-1.5 py-1.5 font-medium hover:underline"
                 style={{ color: "#1E3A5F" }}
               >
                 {job.client_name}

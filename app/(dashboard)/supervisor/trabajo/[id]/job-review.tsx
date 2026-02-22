@@ -83,7 +83,7 @@ export function JobReview({ job, activityLog }: JobReviewProps) {
       )}
 
       {/* Back + header */}
-      <div className="mb-2 flex items-center gap-4">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <Link
           href="/supervisor"
           className="no-underline"
@@ -100,7 +100,7 @@ export function JobReview({ job, activityLog }: JobReviewProps) {
           ← Volver
         </Link>
         <ServiceTypeBadge type={job.service_type} />
-        <div className="flex-1" />
+        <div className="min-w-0 flex-1" />
         <StatusBadge status={job.status} />
       </div>
 
@@ -222,7 +222,7 @@ export function JobReview({ job, activityLog }: JobReviewProps) {
           {job.client_email ? (
             <button
               onClick={() => setShowReportPreview(true)}
-              className="cursor-pointer border-none text-sm font-bold text-white"
+              className="w-full cursor-pointer border-none text-sm font-bold text-white sm:w-auto"
               style={{
                 padding: "12px 24px",
                 borderRadius: 10,
@@ -262,7 +262,7 @@ export function JobReview({ job, activityLog }: JobReviewProps) {
 
       {/* Tabs */}
       <div
-        className="mb-4 flex w-fit gap-1 rounded-[10px] p-[3px]"
+        className="mb-4 flex w-full gap-1 overflow-x-auto rounded-[10px] p-[3px]"
         style={{ background: "#F3F4F6" }}
       >
         {[
@@ -272,7 +272,7 @@ export function JobReview({ job, activityLog }: JobReviewProps) {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className="cursor-pointer border-none text-xs font-semibold"
+            className="min-h-[44px] flex-1 cursor-pointer whitespace-nowrap border-none text-xs font-semibold sm:flex-initial"
             style={{
               padding: "7px 18px",
               borderRadius: 7,

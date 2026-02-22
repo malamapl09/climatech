@@ -75,8 +75,8 @@ export function ReviewQueue({
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-[15px] font-bold text-gray-900">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-bold text-gray-900">
                       {job.client_name}
                     </div>
                     <div className="text-xs" style={{ color: "#6B7280" }}>
@@ -122,9 +122,9 @@ export function ReviewQueue({
                 style={{ borderLeft: "4px solid #059669" }}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-bold">{job.client_name}</div>
-                    <div className="text-xs" style={{ color: "#6B7280" }}>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold">{job.client_name}</div>
+                    <div className="truncate text-xs" style={{ color: "#6B7280" }}>
                       {job.equipment}
                     </div>
                   </div>
@@ -162,7 +162,7 @@ export function ReviewQueue({
               >
                 <div className="flex items-center justify-between">
                   <div
-                    className="text-[13px] font-semibold"
+                    className="min-w-0 flex-1 truncate text-[13px] font-semibold"
                     style={{ color: "#374151" }}
                   >
                     {job.client_name} — {job.equipment}
@@ -195,9 +195,9 @@ export function ReviewQueue({
                 style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
               >
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <div
-                      className="text-[13px] font-semibold"
+                      className="truncate text-[13px] font-semibold"
                       style={{ color: "#374151" }}
                     >
                       {job.client_name}

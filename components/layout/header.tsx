@@ -34,7 +34,7 @@ export function Header({
       {/* Mobile menu */}
       <button
         onClick={onMenuToggle}
-        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 lg:hidden"
+        className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 lg:hidden"
       >
         <Menu className="h-5 w-5" style={{ color: "#374151" }} />
       </button>

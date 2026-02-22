@@ -64,17 +64,16 @@ export function ReportPreview({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[580px] overflow-auto bg-white"
+        className="max-h-[90vh] w-full max-w-[580px] overflow-y-auto bg-white"
         style={{
           borderRadius: 20,
-          maxHeight: "85vh",
           boxShadow: "0 25px 50px rgba(0,0,0,0.25)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Branded header */}
         <div
-          className="px-7 pb-5 pt-7 text-white"
+          className="px-4 pb-4 pt-5 text-white sm:px-7 sm:pb-5 sm:pt-7"
           style={{
             background: "linear-gradient(135deg, #1E3A5F, #2D5F8A)",
             borderRadius: "20px 20px 0 0",
@@ -95,7 +94,7 @@ export function ReportPreview({
         </div>
 
         {/* Content */}
-        <div className="p-7">
+        <div className="p-4 sm:p-7">
           {/* Client + Service info */}
           <div
             className="mb-6 grid grid-cols-2 gap-4 pb-4"
@@ -170,12 +169,7 @@ export function ReportPreview({
               >
                 Evidencia Fotográfica ({approvedPhotos.length})
               </div>
-              <div
-                className="grid gap-2.5"
-                style={{
-                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                }}
-              >
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {approvedPhotos.map((photo) => (
                   <div key={photo.id}>
                     {photoUrls[photo.id] ? (
@@ -225,7 +219,7 @@ export function ReportPreview({
             <button
               onClick={onSend}
               disabled={sending}
-              className="flex-1 cursor-pointer rounded-[10px] border-none py-3 text-sm font-bold text-white"
+              className="min-h-[44px] flex-1 cursor-pointer rounded-[10px] border-none py-3 text-sm font-bold text-white"
               style={{
                 background: "linear-gradient(135deg, #059669, #047857)",
               }}
@@ -234,7 +228,7 @@ export function ReportPreview({
             </button>
             <button
               onClick={onClose}
-              className="cursor-pointer rounded-[10px] px-5 py-3 text-[13px] font-semibold"
+              className="min-h-[44px] cursor-pointer rounded-[10px] px-5 py-3 text-[13px] font-semibold"
               style={{
                 border: "2px solid #E5E7EB",
                 background: "#fff",

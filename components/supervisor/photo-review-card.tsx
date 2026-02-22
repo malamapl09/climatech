@@ -89,7 +89,7 @@ export function PhotoReviewCard({
 
   return (
     <div
-      className="flex gap-4 rounded-[14px] bg-white p-4"
+      className="flex flex-col gap-4 rounded-[14px] bg-white p-4 sm:flex-row"
       style={{
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
         border: isPending
@@ -99,7 +99,7 @@ export function PhotoReviewCard({
       }}
     >
       {/* Photo thumbnail */}
-      <div className="w-[110px] flex-shrink-0 overflow-hidden rounded-[10px]">
+      <div className="w-full flex-shrink-0 overflow-hidden rounded-[10px] sm:w-[110px]">
         {url ? (
           <img
             src={url}
@@ -160,14 +160,14 @@ export function PhotoReviewCard({
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                   placeholder="Motivo del rechazo de esta foto..."
-                  className="w-full rounded-md border p-2 text-[13px] outline-none"
+                  className="w-full rounded-md border p-2 text-base outline-none"
                   style={{ border: "1px solid #FECACA", boxSizing: "border-box" }}
                 />
                 <div className="mt-2 flex gap-1.5">
                   <button
                     onClick={handleReject}
                     disabled={loading || !rejectReason.trim()}
-                    className="cursor-pointer rounded-md border-none px-3.5 py-1.5 text-[11px] font-bold text-white"
+                    className="min-h-[44px] cursor-pointer rounded-md border-none px-3.5 py-1.5 text-[11px] font-bold text-white"
                     style={{ background: "#DC2626" }}
                   >
                     Rechazar
@@ -177,7 +177,7 @@ export function PhotoReviewCard({
                       setRejecting(false);
                       setRejectReason("");
                     }}
-                    className="cursor-pointer rounded-md px-3.5 py-1.5 text-[11px] font-semibold"
+                    className="min-h-[44px] cursor-pointer rounded-md px-3.5 py-1.5 text-[11px] font-semibold"
                     style={{
                       border: "1px solid #E5E7EB",
                       background: "#fff",
@@ -193,7 +193,7 @@ export function PhotoReviewCard({
                 <button
                   onClick={handleApprove}
                   disabled={loading}
-                  className="cursor-pointer rounded-lg border-none px-[18px] py-[7px] text-xs font-bold text-white"
+                  className="min-h-[44px] cursor-pointer rounded-lg border-none px-[18px] py-[7px] text-xs font-bold text-white"
                   style={{ background: "#059669" }}
                 >
                   ✓ Aprobar Foto
@@ -201,7 +201,7 @@ export function PhotoReviewCard({
                 <button
                   onClick={() => setRejecting(true)}
                   disabled={loading}
-                  className="cursor-pointer rounded-lg bg-transparent px-[18px] py-[7px] text-xs font-bold"
+                  className="min-h-[44px] cursor-pointer rounded-lg bg-transparent px-[18px] py-[7px] text-xs font-bold"
                   style={{ border: "2px solid #DC2626", color: "#DC2626" }}
                 >
                   ✗ Rechazar

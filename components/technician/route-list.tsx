@@ -204,8 +204,8 @@ export function RouteList({ route, userName }: { route: RouteData; userName: str
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[15px] font-bold text-gray-900">
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span className="min-w-0 truncate text-[15px] font-bold text-gray-900">
                             {job.client_name}
                           </span>
                           <ServiceTypeBadge type={job.service_type} />
@@ -229,7 +229,7 @@ export function RouteList({ route, userName }: { route: RouteData; userName: str
                       )}
                     </div>
                     <div
-                      className="mt-1 text-xs"
+                      className="mt-1 line-clamp-2 text-xs"
                       style={{ color: "#9CA3AF" }}
                     >
                       📍 {job.address}

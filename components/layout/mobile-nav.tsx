@@ -41,14 +41,14 @@ export function MobileNav({
             </div>
             <div>
               <div className="text-[15px] font-extrabold text-gray-900">ClimaTech</div>
-              <div className="text-[8px] font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>
+              <div className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>
                 Gestion de Campo
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-gray-100"
+            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-gray-100"
           >
             <X className="h-5 w-5" style={{ color: "#6B7280" }} />
           </button>
@@ -67,7 +67,7 @@ export function MobileNav({
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-semibold no-underline transition-colors"
+                className="flex items-center gap-3 rounded-xl px-3 py-3 text-[13px] font-semibold no-underline transition-colors"
                 style={{
                   background: isActive ? "#1E3A5F" : "transparent",
                   color: isActive ? "#fff" : "#6B7280",
