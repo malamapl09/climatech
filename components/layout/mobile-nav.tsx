@@ -61,7 +61,7 @@ export function MobileNav({
               pathname === item.href ||
               (item.href !== "/" &&
                 item.href !== "/notificaciones" &&
-                pathname.startsWith(item.href));
+                pathname.startsWith(item.href + "/"));
             return (
               <Link
                 key={item.href}
