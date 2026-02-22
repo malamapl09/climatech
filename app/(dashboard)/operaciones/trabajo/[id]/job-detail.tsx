@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { WorkflowStepper } from "@/components/shared/workflow-stepper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
+import { NavigationLinks } from "@/components/shared/navigation-links";
 import { PhotoGrid } from "@/components/technician/photo-grid";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
-import type { Job, Photo, Material } from "@/types";
+import type { Job, Photo, Material, ActivityType } from "@/types";
 
 interface JobDetailProps {
   job: Job & {
@@ -20,16 +23,47 @@ interface JobDetailProps {
   activityLog: Array<{
     id: string;
     action: string;
-    type: "status_change" | "photo_upload" | "photo_review" | "note" | "report" | "assignment";
+    type: ActivityType;
     created_at: string;
     performer: { id: string; full_name: string } | null;
   }>;
 }
 
 export function JobDetail({ job, activityLog }: JobDetailProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"fotos" | "bitacora">("fotos");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`;
+  const canCancel = ["scheduled", "in_progress"].includes(job.status);
+
+  async function handleCancel() {
+    if (!cancelReason.trim()) {
+      toast.error("El motivo de cancelacion es obligatorio");
+      return;
+    }
+    setIsCancelling(true);
+    try {
+      const res = await fetch(`/api/jobs/${job.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: cancelReason.trim() }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Error al cancelar");
+      }
+      toast.success("Trabajo cancelado");
+      setShowCancelModal(false);
+      setCancelReason("");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error");
+    } finally {
+      setIsCancelling(false);
+    }
+  }
 
   return (
     <div>
@@ -146,17 +180,82 @@ export function JobDetail({ job, activityLog }: JobDetailProps) {
         </div>
       )}
 
-      {/* Navigate button */}
+      {/* Navigation links */}
       <div className="mb-4">
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
-          <div
-            className="flex cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-white py-3 text-[13px] font-semibold"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)", color: "#1E3A5F" }}
-          >
-            📍 Ver en Mapa
-          </div>
-        </a>
+        <NavigationLinks address={job.address} mode="full" />
       </div>
+
+      {/* Cancel button (operations/admin only) */}
+      {canCancel && (
+        <div className="mb-4">
+          {!showCancelModal ? (
+            <button
+              onClick={() => setShowCancelModal(true)}
+              className="w-full cursor-pointer rounded-[14px] border-2 bg-white py-3 text-center text-[13px] font-semibold transition-colors hover:bg-red-50"
+              style={{ borderColor: "#FCA5A5", color: "#DC2626" }}
+            >
+              🚫 Cancelar Trabajo
+            </button>
+          ) : (
+            <div
+              className="rounded-[14px] bg-white p-[22px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)", border: "2px solid #FCA5A5" }}
+            >
+              <div className="mb-3 text-sm font-bold" style={{ color: "#DC2626" }}>
+                Cancelar Trabajo
+              </div>
+              <input
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Motivo de la cancelacion..."
+                className="mb-3 w-full rounded-lg border p-2.5 text-sm outline-none"
+                style={{ borderColor: "#FCA5A5" }}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancel}
+                  disabled={isCancelling || !cancelReason.trim()}
+                  className="cursor-pointer rounded-lg border-none px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+                  style={{ background: "#DC2626" }}
+                >
+                  {isCancelling ? "Cancelando..." : "Confirmar Cancelacion"}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCancelModal(false);
+                    setCancelReason("");
+                  }}
+                  className="cursor-pointer rounded-lg border px-4 py-2 text-xs font-semibold"
+                  style={{ borderColor: "#E5E7EB", background: "#fff", color: "#6B7280" }}
+                >
+                  Volver
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Cancellation info */}
+      {job.status === "cancelled" && job.cancel_reason && (
+        <div
+          className="mb-4 rounded-[14px] p-[18px]"
+          style={{
+            background: "#FEF2F2",
+            borderLeft: "4px solid #DC2626",
+          }}
+        >
+          <div
+            className="mb-1 text-[10px] font-bold uppercase"
+            style={{ color: "#DC2626" }}
+          >
+            Motivo de Cancelacion
+          </div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "#7F1D1D" }}>
+            {job.cancel_reason}
+          </div>
+        </div>
+      )}
 
       {/* Supervisor notes (if any) */}
       {job.supervisor_notes && (

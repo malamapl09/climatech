@@ -20,6 +20,7 @@ export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   supervisor_review: "Revisión Supervisor",
   approved: "Aprobado",
   report_sent: "Reporte Enviado",
+  cancelled: "Cancelado",
 };
 
 export const PHOTO_STATUS_LABELS: Record<PhotoStatus, string> = {
@@ -41,6 +42,7 @@ export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
   note: "Nota",
   report: "Reporte",
   assignment: "Asignación",
+  cancellation: "Cancelación",
 };
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
@@ -51,4 +53,5 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   job_approved: "Trabajo aprobado",
   report_sent: "Reporte enviado",
   job_overdue: "Trabajo vencido",
+  job_cancelled: "Trabajo cancelado",
 };

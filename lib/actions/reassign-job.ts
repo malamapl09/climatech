@@ -9,6 +9,8 @@ interface ReassignInput {
   jobId: string;
   targetDate: string;
   targetTechnicianId: string;
+  targetSupervisorId?: string;
+  resetStatus?: boolean; // default true — set false to preserve in_progress
 }
 
 /**
@@ -21,6 +23,8 @@ export async function reassignJob({
   jobId,
   targetDate,
   targetTechnicianId,
+  targetSupervisorId,
+  resetStatus = true,
 }: ReassignInput) {
   const supabase = await createClient();
 
@@ -94,19 +98,48 @@ export async function reassignJob({
 
   const routeOrder = (count ?? 0) + 1;
 
+  // Build update payload
+  const updatePayload: Record<string, unknown> = {
+    route_id: targetRouteId,
+    route_order: routeOrder,
+    technician_id: targetTechnicianId,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (resetStatus) {
+    updatePayload.status = "scheduled";
+  }
+
+  if (targetSupervisorId) {
+    updatePayload.supervisor_id = targetSupervisorId;
+  }
+
   // Update the job
   const { error: updateErr } = await supabase
     .from("jobs")
-    .update({
-      route_id: targetRouteId,
-      route_order: routeOrder,
-      technician_id: targetTechnicianId,
-      status: "scheduled",
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq("id", jobId);
 
   if (updateErr) throw new Error(updateErr.message);
+
+  // Notify old and new technician
+  if (job.technician_id !== targetTechnicianId) {
+    await supabase.from("notifications").insert({
+      user_id: job.technician_id,
+      type: "route_published" as const,
+      title: "Trabajo reasignado",
+      message: `El trabajo para ${job.client_name} fue reasignado a otro tecnico.`,
+      job_id: jobId,
+    });
+
+    await supabase.from("notifications").insert({
+      user_id: targetTechnicianId,
+      type: "route_published" as const,
+      title: "Nuevo trabajo asignado",
+      message: `Se te asigno el trabajo para ${job.client_name}.`,
+      job_id: jobId,
+    });
+  }
 
   // Log activity
   await logActivity({
@@ -117,6 +150,8 @@ export async function reassignJob({
       old_date: oldDate,
       new_date: targetDate,
       new_technician_id: targetTechnicianId,
+      ...(targetSupervisorId ? { new_supervisor_id: targetSupervisorId } : {}),
+      status_preserved: !resetStatus,
     },
   });
 }

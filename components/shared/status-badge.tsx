@@ -34,6 +34,12 @@ const STATUS_CONFIG: Record<
     bg: "#E0E7FF",
     icon: "📨",
   },
+  cancelled: {
+    label: "Cancelado",
+    color: "#DC2626",
+    bg: "#FEF2F2",
+    icon: "🚫",
+  },
 };
 
 export function StatusBadge({ status }: { status: JobStatus }) {

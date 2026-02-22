@@ -7,7 +7,8 @@ export type JobStatus =
   | "in_progress"
   | "supervisor_review"
   | "approved"
-  | "report_sent";
+  | "report_sent"
+  | "cancelled";
 
 // ── Photo status ──
 export type PhotoStatus = "pending" | "approved" | "rejected";
@@ -22,7 +23,8 @@ export type ActivityType =
   | "photo_review"
   | "note"
   | "report"
-  | "assignment";
+  | "assignment"
+  | "cancellation";
 
 // ── Notification type ──
 export type NotificationType =
@@ -32,7 +34,8 @@ export type NotificationType =
   | "job_rejected"
   | "job_approved"
   | "report_sent"
-  | "job_overdue";
+  | "job_overdue"
+  | "job_cancelled";
 
 // ── Database row types ──
 export interface Profile {
@@ -92,6 +95,9 @@ export interface Job {
   report_sent_at: string | null;
   report_token: string | null;
   report_token_expires_at: string | null;
+  cancel_reason: string | null;
+  cancelled_by: string | null;
+  cancelled_at: string | null;
   created_at: string;
   updated_at: string;
 }

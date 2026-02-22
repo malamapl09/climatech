@@ -33,7 +33,9 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button, Modal } from "@heroui/react";
 import { createJob } from "@/lib/actions/jobs";
 import { addMaterials } from "@/lib/actions/materials";
+import { createNotification } from "@/lib/actions/notifications";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import type { UseOverlayStateReturn } from "@heroui/react";
 import type { Profile, ServiceType } from "@/types";
 
@@ -49,6 +51,7 @@ interface StopFormProps {
   nextOrder: number;
   modalState: UseOverlayStateReturn;
   onCreated: () => void;
+  isEmergency?: boolean;
 }
 
 const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
@@ -67,6 +70,7 @@ export function StopForm({
   nextOrder,
   modalState,
   onCreated,
+  isEmergency = false,
 }: StopFormProps) {
   // ── Form state ──────────────────────────────────────────────────────────────
   const [clientName, setClientName] = useState("");
@@ -192,7 +196,22 @@ export function StopForm({
           .filter((m) => m.name.trim())
           .map((m) => ({ name: m.name.trim(), quantity: m.quantity }));
         if (validMaterials.length > 0) {
-          await addMaterials(job.id, validMaterials).catch(() => {});
+          await addMaterials(job.id, validMaterials).catch(() => {
+            toast.warning("Los materiales no se pudieron guardar.");
+          });
+        }
+
+        // Notify technician if emergency stop (server-side for RLS safety)
+        if (isEmergency) {
+          await createNotification({
+            userId: technicianId,
+            type: "route_published",
+            title: "Nueva parada de emergencia",
+            message: `Se agrego una nueva parada a tu ruta: ${clientName.trim()}`,
+            jobId: job.id,
+          }).catch(() => {
+            toast.warning("No se pudo notificar al tecnico.");
+          });
         }
 
         modalState.close();
@@ -222,6 +241,16 @@ export function StopForm({
               </Modal.Header>
 
               <Modal.Body className="space-y-5">
+                {/* Emergency warning */}
+                {isEmergency && (
+                  <div
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold"
+                    style={{ background: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5" }}
+                  >
+                    ⚠️ Esta ruta ya fue publicada. Se notificara al tecnico de la nueva parada.
+                  </div>
+                )}
+
                 {/* Global error */}
                 {error && (
                   <p

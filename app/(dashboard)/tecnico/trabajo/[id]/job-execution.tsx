@@ -7,11 +7,12 @@ import { toast } from "sonner";
 import { WorkflowStepper } from "@/components/shared/workflow-stepper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
+import { NavigationLinks } from "@/components/shared/navigation-links";
 import { PhotoUpload } from "@/components/technician/photo-upload";
 import { PhotoGrid } from "@/components/technician/photo-grid";
 import { MaterialsList } from "@/components/technician/materials-list";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
-import type { Job, Photo, Material } from "@/types";
+import type { Job, Photo, Material, ActivityType } from "@/types";
 
 interface JobExecutionProps {
   job: Job & {
@@ -23,7 +24,7 @@ interface JobExecutionProps {
   activityLog: Array<{
     id: string;
     action: string;
-    type: "status_change" | "photo_upload" | "photo_review" | "note" | "report" | "assignment";
+    type: ActivityType;
     created_at: string;
     performer: { id: string; full_name: string } | null;
   }>;
@@ -38,8 +39,6 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
   const canStart = job.status === "scheduled";
   const canComplete = job.status === "in_progress" && job.photos.length > 0;
   const canUpload = job.status === "in_progress";
-
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.address)}`;
 
   async function handleStart() {
     setIsStarting(true);
@@ -202,16 +201,9 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
         </div>
       )}
 
-      {/* Navigate button */}
+      {/* Navigate buttons */}
       <div className="mb-4">
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="no-underline">
-          <div
-            className="flex cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-white py-3 text-[13px] font-semibold"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)", color: "#1E3A5F" }}
-          >
-            📍 Navegar a Direccion
-          </div>
-        </a>
+        <NavigationLinks address={job.address} mode="full" />
       </div>
 
       {/* Complete CTA */}
@@ -300,7 +292,12 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
               className="rounded-[14px] bg-white p-[22px]"
               style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
             >
-              <PhotoGrid photos={job.photos} />
+              <PhotoGrid
+                photos={job.photos}
+                jobId={job.id}
+                canUpload={canUpload}
+                onPhotoUploaded={() => router.refresh()}
+              />
             </div>
           )}
         </div>

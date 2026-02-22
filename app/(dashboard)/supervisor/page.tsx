@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReviewQueue } from "@/components/supervisor/review-queue";
+import { TechnicianMetricsPanel } from "@/components/supervisor/technician-metrics";
+import { getSupervisorMetrics } from "@/lib/actions/supervisor-metrics";
 
 export default async function SupervisorPage() {
   const supabase = await createClient();
@@ -10,7 +12,7 @@ export default async function SupervisorPage() {
 
   if (!user) redirect("/iniciar-sesion");
 
-  const [{ data: jobs }, { data: profile }] = await Promise.all([
+  const [{ data: jobs }, { data: profile }, metrics] = await Promise.all([
     supabase
       .from("jobs")
       .select(
@@ -26,12 +28,16 @@ export default async function SupervisorPage() {
       .select("full_name")
       .eq("id", user.id)
       .single(),
+    getSupervisorMetrics(user.id),
   ]);
 
   return (
-    <ReviewQueue
-      jobs={jobs || []}
-      userName={profile?.full_name ?? "Supervisor"}
-    />
+    <div className="space-y-6">
+      <ReviewQueue
+        jobs={jobs || []}
+        userName={profile?.full_name ?? "Supervisor"}
+      />
+      <TechnicianMetricsPanel metrics={metrics} />
+    </div>
   );
 }

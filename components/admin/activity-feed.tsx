@@ -18,6 +18,7 @@ const TYPE_COLORS: Record<ActivityType, string> = {
   note: "#D1D5DB",
   report: "#4338CA",
   assignment: "#D97706",
+  cancellation: "#DC2626",
 };
 
 export function ActivityFeed({ entries }: { entries: FeedEntry[] }) {

@@ -27,6 +27,7 @@ const typeIcons: Record<NotificationType, React.ReactNode> = {
   job_approved: <CheckCircle className="h-5 w-5 text-green-500" />,
   report_sent: <Send className="h-5 w-5 text-teal-500" />,
   job_overdue: <AlertTriangle className="h-5 w-5 text-amber-600" />,
+  job_cancelled: <XCircle className="h-5 w-5 text-red-600" />,
 };
 
 const JOB_PATH_BY_ROLE: Record<UserRole, string> = {

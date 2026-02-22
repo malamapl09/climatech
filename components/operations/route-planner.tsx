@@ -7,6 +7,7 @@ import { Button, Modal, useOverlayState } from "@heroui/react";
 import { createRoute } from "@/lib/actions/routes";
 import { reassignJob } from "@/lib/actions/reassign-job";
 import { createClient } from "@/lib/supabase/client";
+import { useRealtimeOperations } from "@/lib/hooks/use-realtime-operations";
 import { RouteCard } from "@/components/operations/route-card";
 import { OverdueJobsBanner } from "@/components/shared/overdue-jobs-banner";
 import { todayISO } from "@/lib/utils/date";
@@ -24,6 +25,7 @@ export function RoutePlanner({
   overdueJobs = [],
 }: RoutePlannerProps) {
   const router = useRouter();
+  useRealtimeOperations(initialDate);
   const [routes, setRoutes] = useState<RouteWithJobs[]>(initialRoutes);
   const [selectedDate, setSelectedDate] = useState(initialDate);
   const [technicians, setTechnicians] = useState<
@@ -41,8 +43,12 @@ export function RoutePlanner({
   const [reassignJobId, setReassignJobId] = useState<string | null>(null);
   const [reassignDate, setReassignDate] = useState(todayISO());
   const [reassignTechId, setReassignTechId] = useState("");
+  const [reassignSupervisorId, setReassignSupervisorId] = useState("");
+  const [reassignKeepStatus, setReassignKeepStatus] = useState(false);
   const [reassignError, setReassignError] = useState<string | null>(null);
   const [isReassigning, startReassign] = useTransition();
+  const [supervisors, setSupervisors] = useState<Pick<Profile, "id" | "full_name">[]>([]);
+  const hasFetchedSupervisors = useRef(false);
 
   useEffect(() => {
     setRoutes(initialRoutes);
@@ -75,6 +81,27 @@ export function RoutePlanner({
       });
   }, [modalState.isOpen, reassignModalState.isOpen]);
 
+  // Fetch supervisors when reassign modal opens
+  useEffect(() => {
+    if (!reassignModalState.isOpen || hasFetchedSupervisors.current) return;
+    hasFetchedSupervisors.current = true;
+
+    const supabase = createClient();
+    supabase
+      .from("profiles")
+      .select("id, full_name")
+      .eq("role", "supervisor")
+      .eq("is_active", true)
+      .order("full_name", { ascending: true })
+      .then(({ data, error: sbError }) => {
+        if (sbError) {
+          setReassignError("No se pudo cargar la lista de supervisores.");
+          return;
+        }
+        setSupervisors((data ?? []) as Pick<Profile, "id" | "full_name">[]);
+      });
+  }, [reassignModalState.isOpen]);
+
   // Filter out technicians who already have a route on the selected date
   const assignedTechIds = useMemo(
     () => new Set(routes.map((r) => r.technician.id)),
@@ -94,10 +121,21 @@ export function RoutePlanner({
     }
   }, [availableTechnicians, selectedTechId, technicians.length]);
 
+  // Find job status to decide default for keepStatus
+  function findJobStatus(jobId: string): string | null {
+    for (const r of routes) {
+      const j = r.jobs.find((j) => j.id === jobId);
+      if (j) return j.status;
+    }
+    return null;
+  }
+
   function openReassignModal(jobId: string) {
     setReassignJobId(jobId);
     setReassignDate(todayISO());
     setReassignTechId("");
+    setReassignSupervisorId("");
+    setReassignKeepStatus(findJobStatus(jobId) === "in_progress");
     setReassignError(null);
     reassignModalState.open();
   }
@@ -115,6 +153,8 @@ export function RoutePlanner({
           jobId: reassignJobId,
           targetDate: reassignDate,
           targetTechnicianId: reassignTechId,
+          targetSupervisorId: reassignSupervisorId || undefined,
+          resetStatus: !reassignKeepStatus,
         });
         reassignModalState.close();
         router.refresh();
@@ -305,6 +345,7 @@ export function RoutePlanner({
               key={route.id}
               route={route}
               onMutated={() => router.refresh()}
+              onReassignJob={openReassignModal}
             />
           ))}
         </div>
@@ -457,6 +498,41 @@ export function RoutePlanner({
                     ))}
                   </select>
                 </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="reassign-supervisor"
+                    className="text-sm font-medium"
+                    style={{ color: "#374151" }}
+                  >
+                    Supervisor (opcional)
+                  </label>
+                  <select
+                    id="reassign-supervisor"
+                    value={reassignSupervisorId}
+                    onChange={(e) => setReassignSupervisorId(e.target.value)}
+                    className={inputCls}
+                  >
+                    <option value="">Mantener supervisor actual</option>
+                    {supervisors.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {reassignJobId && findJobStatus(reassignJobId) === "in_progress" && (
+                  <label className="flex items-center gap-2 text-sm" style={{ color: "#374151" }}>
+                    <input
+                      type="checkbox"
+                      checked={reassignKeepStatus}
+                      onChange={(e) => setReassignKeepStatus(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                    Mantener estado actual (en progreso)
+                  </label>
+                )}
               </Modal.Body>
 
               <Modal.Footer className="gap-2">

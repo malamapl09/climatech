@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, AlertTriangle } from "lucide-react";
 import { Button, useOverlayState } from "@heroui/react";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
+import { SortableJobList } from "@/components/operations/sortable-job-list";
 import { StopForm } from "@/components/operations/stop-form";
 import type { RouteWithJobs, JobStatus } from "@/types";
 
@@ -37,13 +35,17 @@ function isCompletedStatus(status: JobStatus): boolean {
   return ["supervisor_review", "approved", "report_sent"].includes(status);
 }
 
+function isCancelled(status: JobStatus): boolean {
+  return status === "cancelled";
+}
+
 interface RouteCardProps {
   route: RouteWithJobs;
   onMutated: () => void;
+  onReassignJob?: (jobId: string) => void;
 }
 
-export function RouteCard({ route, onMutated }: RouteCardProps) {
-  const router = useRouter();
+export function RouteCard({ route, onMutated, onReassignJob }: RouteCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isPublishing, startPublishTransition] = useTransition();
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -54,6 +56,14 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
   const activeJob = jobs.find((j) => j.status === "in_progress");
   const doneCount = jobs.filter((j) => isCompletedStatus(j.status)).length;
   const pendCount = jobs.filter((j) => j.status === "scheduled").length;
+
+  // Workload: total estimated hours from non-cancelled jobs
+  const totalMinutes = jobs
+    .filter((j) => !isCancelled(j.status))
+    .reduce((sum, j) => sum + (j.estimated_time ?? 0), 0);
+  const totalHours = totalMinutes / 60;
+  const workloadColor = totalHours >= 6 ? "#DC2626" : totalHours >= 4 ? "#D97706" : "#059669";
+  const workloadPct = Math.min((totalHours / 8) * 100, 100);
 
   function handlePublish() {
     setPublishError(null);
@@ -143,6 +153,14 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
                 {pendCount}⏳
               </span>
             )}
+            {totalMinutes > 0 && (
+              <span
+                className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                style={{ background: `${workloadColor}15`, color: workloadColor }}
+              >
+                ⏱ {totalHours.toFixed(1)}h
+              </span>
+            )}
             {!route.published && (
               <span
                 className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
@@ -162,6 +180,21 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
             </span>
           </div>
         </div>
+
+        {/* Workload bar */}
+        {totalMinutes > 0 && (
+          <div className="px-6">
+            <div
+              className="h-1 w-full overflow-hidden rounded-full"
+              style={{ background: "#F3F4F6" }}
+            >
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${workloadPct}%`, background: workloadColor }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Expanded body */}
         {expanded && (
@@ -183,110 +216,28 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
                 </p>
               </div>
             ) : (
-              <div className="relative">
-                {/* Vertical timeline line */}
-                <div
-                  className="absolute w-0.5"
-                  style={{
-                    left: 15,
-                    top: 20,
-                    bottom: 20,
-                    background: "#E5E7EB",
-                  }}
-                />
-
-                {jobs.map((job, i) => (
-                    <div
-                      key={job.id}
-                      onClick={() => router.push(`/operaciones/trabajo/${job.id}`)}
-                      className="relative flex cursor-pointer gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50"
-                      style={{
-                        marginBottom: i < jobs.length - 1 ? 6 : 0,
-                        background:
-                          job.status === "in_progress"
-                            ? "#FFFBEB"
-                            : "transparent",
-                        border:
-                          job.status === "in_progress"
-                            ? "1px solid #FDE68A"
-                            : "1px solid transparent",
-                      }}
-                    >
-                      {/* Order circle */}
-                      <div
-                        className="z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-extrabold"
-                        style={{
-                          background: isCompletedStatus(job.status)
-                            ? "#059669"
-                            : job.status === "in_progress"
-                              ? "#D97706"
-                              : "#E5E7EB",
-                          color:
-                            job.status === "scheduled" ? "#6B7280" : "#fff",
-                        }}
-                      >
-                        {isCompletedStatus(job.status)
-                          ? "✓"
-                          : job.route_order}
-                      </div>
-
-                      {/* Job info */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <div className="mb-0.5 flex items-center gap-2">
-                              <span className="text-sm font-bold text-gray-900">
-                                {job.client_name}
-                              </span>
-                              <ServiceTypeBadge type={job.service_type} />
-                            </div>
-                            {job.equipment && (
-                              <div
-                                className="text-xs"
-                                style={{ color: "#6B7280" }}
-                              >
-                                {job.equipment}
-                              </div>
-                            )}
-                            <div
-                              className="mt-0.5 text-[11px]"
-                              style={{ color: "#9CA3AF" }}
-                            >
-                              📍 {job.address}
-                            </div>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            {job.estimated_time && (
-                              <div
-                                className="text-[13px] font-bold"
-                                style={{ color: "#374151" }}
-                              >
-                                {job.estimated_time} min
-                              </div>
-                            )}
-                            <div className="mt-1">
-                              <StatusBadge status={job.status} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                ))}
-              </div>
+              <SortableJobList
+                jobs={jobs}
+                routeId={route.id}
+                isPublished={route.published}
+                onReassignJob={onReassignJob}
+              />
             )}
 
             {/* Action buttons */}
             <div className="mt-4 flex items-center gap-3">
-              {!route.published && (
-                <button
-                  onClick={() => stopFormState.open()}
-                  className="flex items-center gap-1.5 rounded-[10px] border-2 px-3 py-2 text-xs font-semibold transition-colors"
-                  style={{ borderColor: "#E5E7EB", color: "#374151" }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Agregar Parada
-                </button>
-              )}
+              <button
+                onClick={() => stopFormState.open()}
+                className="flex items-center gap-1.5 rounded-[10px] border-2 px-3 py-2 text-xs font-semibold transition-colors"
+                style={
+                  route.published
+                    ? { borderColor: "#FCA5A5", color: "#DC2626", background: "#FEF2F2" }
+                    : { borderColor: "#E5E7EB", color: "#374151" }
+                }
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {route.published ? "Parada de Emergencia" : "Agregar Parada"}
+              </button>
               {!route.published && jobs.length > 0 && (
                 <button
                   onClick={handlePublish}
@@ -315,6 +266,7 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
         nextOrder={route.jobs.length + 1}
         modalState={stopFormState}
         onCreated={onMutated}
+        isEmergency={route.published}
       />
     </>
   );

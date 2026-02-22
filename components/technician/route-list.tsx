@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
+import { NavigationLinks } from "@/components/shared/navigation-links";
 import type { Job, JobStatus, Photo } from "@/types";
 
 interface RouteData {
@@ -113,6 +114,9 @@ export function RouteList({ route, userName }: { route: RouteData; userName: str
               <div className="px-5 py-4">
                 <div className="mb-2 text-[13px]" style={{ color: "#6B7280" }}>
                   📍 {activeJob.address}
+                </div>
+                <div className="mb-2">
+                  <NavigationLinks address={activeJob.address} mode="compact" />
                 </div>
                 {activeJob.equipment && (
                   <div className="mb-2 text-[13px]" style={{ color: "#374151" }}>
@@ -233,6 +237,9 @@ export function RouteList({ route, userName }: { route: RouteData; userName: str
                       style={{ color: "#9CA3AF" }}
                     >
                       📍 {job.address}
+                    </div>
+                    <div className="mt-1.5">
+                      <NavigationLinks address={job.address} mode="compact" />
                     </div>
                     {job.instructions && (
                       <div

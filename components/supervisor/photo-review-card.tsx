@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoStatusBadge } from "@/components/shared/photo-status-badge";
 import { formatDateTime } from "@/lib/utils/date";
@@ -126,6 +126,17 @@ export function PhotoReviewCard({
           </div>
           <PhotoStatusBadge status={photo.status} />
         </div>
+
+        {/* Replacement indicator */}
+        {photo.replaces_id && (
+          <div
+            className="mt-1.5 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold"
+            style={{ background: "#EFF6FF", color: "#1D4ED8" }}
+          >
+            <RefreshCw className="h-3 w-3" />
+            Reemplaza foto rechazada anterior
+          </div>
+        )}
 
         {/* Reject reason */}
         {photo.status === "rejected" && photo.reject_reason && (

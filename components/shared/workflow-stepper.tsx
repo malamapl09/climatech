@@ -18,6 +18,17 @@ const STATUS_ORDER: JobStatus[] = [
 ];
 
 export function WorkflowStepper({ status }: { status: JobStatus }) {
+  if (status === "cancelled") {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-lg py-3.5" style={{ background: "#FEF2F2" }}>
+        <span className="text-lg">🚫</span>
+        <span className="text-sm font-bold" style={{ color: "#DC2626" }}>
+          Trabajo Cancelado
+        </span>
+      </div>
+    );
+  }
+
   const currentIndex = STATUS_ORDER.indexOf(status);
 
   return (

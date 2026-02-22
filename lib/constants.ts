@@ -19,6 +19,7 @@ export const JOB_STATUSES: JobStatus[] = [
   "supervisor_review",
   "approved",
   "report_sent",
+  "cancelled",
 ];
 
 export const PHOTO_STATUSES: PhotoStatus[] = [
@@ -40,6 +41,7 @@ export const ACTIVITY_TYPES: ActivityType[] = [
   "note",
   "report",
   "assignment",
+  "cancellation",
 ];
 
 // ── Chip Colors (HeroUI v3: accent | danger | default | success | warning) ──
@@ -51,6 +53,7 @@ export const JOB_STATUS_COLOR: Record<JobStatus, ChipColor> = {
   supervisor_review: "warning",
   approved: "success",
   report_sent: "accent",
+  cancelled: "danger",
 };
 
 export const PHOTO_STATUS_COLOR: Record<PhotoStatus, ChipColor> = {
