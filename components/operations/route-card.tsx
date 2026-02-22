@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, AlertTriangle } from "lucide-react";
 import { Button, useOverlayState } from "@heroui/react";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -42,6 +43,7 @@ interface RouteCardProps {
 }
 
 export function RouteCard({ route, onMutated }: RouteCardProps) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const [isPublishing, startPublishTransition] = useTransition();
   const [publishError, setPublishError] = useState<string | null>(null);
@@ -196,7 +198,8 @@ export function RouteCard({ route, onMutated }: RouteCardProps) {
                 {jobs.map((job, i) => (
                     <div
                       key={job.id}
-                      className="relative flex gap-4 rounded-xl p-3 transition-colors"
+                      onClick={() => router.push(`/operaciones/trabajo/${job.id}`)}
+                      className="relative flex cursor-pointer gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50"
                       style={{
                         marginBottom: i < jobs.length - 1 ? 6 : 0,
                         background:

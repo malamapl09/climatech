@@ -24,10 +24,10 @@ async function requireAdmin() {
 }
 
 export async function getUsers() {
-  const supabase = await createClient();
+  const { supabase } = await requireAdmin();
   const { data, error } = await supabase
     .from("profiles")
-    .select("*, supervisor:profiles!profiles_supervisor_id_fkey(id, full_name)")
+    .select("*, supervisor:profiles!supervisor_id(id, full_name)")
     .order("full_name");
 
   if (error) throw new Error(error.message);
@@ -35,7 +35,7 @@ export async function getUsers() {
 }
 
 export async function getUser(id: string) {
-  const supabase = await createClient();
+  const { supabase } = await requireAdmin();
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
@@ -90,7 +90,11 @@ export async function createUser({
     })
     .eq("id", data.user.id);
 
-  if (profileError) throw new Error(profileError.message);
+  if (profileError) {
+    // Rollback: delete the auth user to avoid orphaned half-configured user
+    await admin.auth.admin.deleteUser(data.user.id);
+    throw new Error(profileError.message);
+  }
 
   return data.user;
 }

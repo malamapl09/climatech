@@ -89,15 +89,15 @@ export function UserForm({ user, supervisors, mode }: UserFormProps) {
               <FormField
                 name="email"
                 type="email"
-                label="Correo electronico"
+                label="Correo electrónico"
                 placeholder="juan@empresa.com"
                 required
               />
               <FormField
                 name="password"
                 type="password"
-                label="Contrasena"
-                placeholder="Minimo 6 caracteres"
+                label="Contraseña"
+                placeholder="Mínimo 6 caracteres"
                 required
               />
             </>
@@ -105,7 +105,7 @@ export function UserForm({ user, supervisors, mode }: UserFormProps) {
 
           <FormField
             name="phone"
-            label="Telefono"
+            label="Teléfono"
             placeholder="809-555-0100"
             defaultValue={user?.phone || ""}
           />

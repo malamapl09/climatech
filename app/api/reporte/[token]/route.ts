@@ -46,7 +46,7 @@ export async function GET(
   for (const photo of approvedPhotos) {
     const { data } = await supabase.storage
       .from("job-photos")
-      .createSignedUrl(photo.storage_path, 3600);
+      .createSignedUrl(photo.storage_path, 60 * 60 * 24 * 30);
     if (data?.signedUrl) {
       photoHtml.push(`
         <div style="margin-bottom:16px;">

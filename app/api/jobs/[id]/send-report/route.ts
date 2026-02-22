@@ -122,7 +122,13 @@ export async function POST(
     // Rollback status on email failure so supervisor can retry
     await supabase
       .from("jobs")
-      .update({ status: "approved", report_sent: false })
+      .update({
+        status: "approved",
+        report_sent: false,
+        report_sent_at: null,
+        report_token: null,
+        report_token_expires_at: null,
+      })
       .eq("id", id);
     return NextResponse.json(
       { error: `Error enviando email: ${err instanceof Error ? err.message : "desconocido"}` },
@@ -136,6 +142,15 @@ export async function POST(
     action: `Reporte enviado al cliente: ${job.client_email}`,
     type: "report",
     performed_by: user.id,
+  });
+
+  // Notify technician that report was sent
+  await supabase.from("notifications").insert({
+    user_id: job.technician_id,
+    type: "report_sent",
+    title: "Reporte enviado al cliente",
+    message: `El reporte para ${job.client_name} fue enviado a ${job.client_email}`,
+    job_id: id,
   });
 
   return NextResponse.json({ success: true, reportUrl });

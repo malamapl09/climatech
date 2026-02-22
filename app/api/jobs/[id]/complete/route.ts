@@ -37,11 +37,12 @@ export async function POST(
     );
   }
 
-  // Validate at least 1 photo
+  // Validate at least 1 non-rejected photo
   const { count } = await supabase
     .from("photos")
     .select("*", { count: "exact", head: true })
-    .eq("job_id", id);
+    .eq("job_id", id)
+    .neq("status", "rejected");
 
   if (!count || count === 0) {
     return NextResponse.json(

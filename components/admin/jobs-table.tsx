@@ -1,16 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import type { Job } from "@/types";
 
 type TableJob = Job & {
-  technician: { id: string; full_name: string };
-  supervisor: { id: string; full_name: string };
-  route: { date: string };
+  technician: { id: string; full_name: string } | null;
+  supervisor: { id: string; full_name: string } | null;
+  route: { date: string } | null;
 };
 
 export function JobsTable({ jobs }: { jobs: TableJob[] }) {
+  const router = useRouter();
+
   if (jobs.length === 0) {
     return (
       <div
@@ -37,7 +40,7 @@ export function JobsTable({ jobs }: { jobs: TableJob[] }) {
         <table className="w-full" style={{ borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#F9FAFB" }}>
-              {["Cliente", "Tipo", "Tecnico", "Supervisor", "Estado", ""].map(
+              {["Cliente", "Tipo", "Técnico", "Supervisor", "Estado", ""].map(
                 (h, i) => (
                   <th
                     key={i}
@@ -54,6 +57,7 @@ export function JobsTable({ jobs }: { jobs: TableJob[] }) {
             {jobs.map((job) => (
               <tr
                 key={job.id}
+                onClick={() => router.push(`/operaciones/trabajo/${job.id}`)}
                 className="cursor-pointer transition-colors hover:bg-gray-50"
                 style={{ borderBottom: "1px solid #F3F4F6" }}
               >
@@ -72,10 +76,10 @@ export function JobsTable({ jobs }: { jobs: TableJob[] }) {
                   <ServiceTypeBadge type={job.service_type} />
                 </td>
                 <td className="px-3 py-3 text-xs" style={{ color: "#374151" }}>
-                  {job.technician.full_name}
+                  {job.technician?.full_name ?? "—"}
                 </td>
                 <td className="px-3 py-3 text-xs" style={{ color: "#374151" }}>
-                  {job.supervisor.full_name}
+                  {job.supervisor?.full_name ?? "—"}
                 </td>
                 <td className="px-3 py-3">
                   <StatusBadge status={job.status} />

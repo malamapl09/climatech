@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button, Modal, useOverlayState } from "@heroui/react";
@@ -55,9 +55,27 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
         setTechnicians(
           (data ?? []) as Pick<Profile, "id" | "full_name" | "zone">[]
         );
-        if (data && data.length > 0) setSelectedTechId(data[0].id);
       });
   }, [modalState.isOpen]);
+
+  // Filter out technicians who already have a route on the selected date
+  const assignedTechIds = useMemo(
+    () => new Set(routes.map((r) => r.technician.id)),
+    [routes]
+  );
+  const availableTechnicians = useMemo(
+    () => technicians.filter((t) => !assignedTechIds.has(t.id)),
+    [technicians, assignedTechIds]
+  );
+
+  // Auto-select first available technician when the list changes
+  useEffect(() => {
+    if (availableTechnicians.length > 0 && !availableTechnicians.find((t) => t.id === selectedTechId)) {
+      setSelectedTechId(availableTechnicians[0].id);
+    } else if (availableTechnicians.length === 0 && technicians.length > 0) {
+      setSelectedTechId("");
+    }
+  }, [availableTechnicians, selectedTechId, technicians.length]);
 
   function handleDateChange(e: React.ChangeEvent<HTMLInputElement>) {
     const next = e.target.value;
@@ -252,13 +270,19 @@ export function RoutePlanner({ initialRoutes, initialDate }: RoutePlannerProps) 
                     onChange={(e) => setSelectedTechId(e.target.value)}
                     required
                     className={inputCls}
+                    disabled={availableTechnicians.length === 0 && technicians.length > 0}
                   >
                     {technicians.length === 0 && (
                       <option value="" disabled>
                         Cargando tecnicos...
                       </option>
                     )}
-                    {technicians.map((t) => (
+                    {technicians.length > 0 && availableTechnicians.length === 0 && (
+                      <option value="" disabled>
+                        Todos los tecnicos ya tienen ruta
+                      </option>
+                    )}
+                    {availableTechnicians.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.full_name}
                         {t.zone ? ` — ${t.zone}` : ""}

@@ -1,9 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getActivityLog } from "@/lib/actions/activity-log";
-import { JobExecution } from "./job-execution";
+import { JobDetail } from "./job-detail";
 
-export default async function TechnicianJobPage({
+export default async function OperationsJobPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -23,10 +23,10 @@ export default async function TechnicianJobPage({
       photos(*),
       materials(*),
       technician:profiles!jobs_technician_id_fkey(id, full_name, phone),
-      supervisor:profiles!jobs_supervisor_id_fkey(id, full_name)`
+      supervisor:profiles!jobs_supervisor_id_fkey(id, full_name),
+      route:routes!jobs_route_id_fkey(id, date)`
     )
     .eq("id", id)
-    .eq("technician_id", user.id)
     .single();
 
   if (!job) notFound();
@@ -35,8 +35,8 @@ export default async function TechnicianJobPage({
   try {
     activityLog = await getActivityLog(id);
   } catch {
-    // Activity log is non-critical — render page without it
+    // Activity log is non-critical
   }
 
-  return <JobExecution job={job} activityLog={activityLog} />;
+  return <JobDetail job={job} activityLog={activityLog} />;
 }

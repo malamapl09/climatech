@@ -27,6 +27,7 @@ export default async function SupervisorJobPage({
       route:routes!jobs_route_id_fkey(id, date)`
     )
     .eq("id", id)
+    .eq("supervisor_id", user.id)
     .single();
 
   if (!job) notFound();

@@ -46,7 +46,12 @@ export function WorkflowStepper({ status }: { status: JobStatus }) {
             {i < STEPS.length - 1 && (
               <div
                 className="mx-1.5 mb-[18px] h-[3px] flex-1 rounded-sm"
-                style={{ background: active ? "#1E3A5F" : "#E5E7EB" }}
+                style={{
+                  background:
+                    currentIndex >= STATUS_ORDER.indexOf(STEPS[i + 1].key)
+                      ? "#1E3A5F"
+                      : "#E5E7EB",
+                }}
               />
             )}
           </div>

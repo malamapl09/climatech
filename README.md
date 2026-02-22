@@ -2,7 +2,7 @@
 
 ClimaTech replaces WhatsApp-based coordination for 50+ HVAC field technicians with a structured web platform. The core value is a **photo-based quality control workflow**: Operations plans routes, technicians execute and upload photo evidence, supervisors review every photo individually, then approve the job and send a branded report to the client.
 
-**Production:** [hvac-fc8fk4ag1-malamapl09s-projects.vercel.app](https://hvac-fc8fk4ag1-malamapl09s-projects.vercel.app)
+**Production:** [hvac-ops.vercel.app](https://hvac-ops.vercel.app)
 
 ## Tech Stack
 
@@ -63,7 +63,9 @@ app/
 ├── (dashboard)/
 │   ├── layout.tsx                          # Sidebar + header shell
 │   ├── dashboard-shell.tsx                 # Client: sidebar toggle, mobile nav
-│   ├── operaciones/page.tsx                # Route planning
+│   ├── operaciones/
+│   │   ├── page.tsx                        # Route planning
+│   │   └── trabajo/[id]/                   # Job detail (read-only)
 │   ├── tecnico/
 │   │   ├── page.tsx                        # Daily route
 │   │   └── trabajo/[id]/                   # Job execution

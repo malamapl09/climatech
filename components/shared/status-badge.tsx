@@ -17,7 +17,7 @@ const STATUS_CONFIG: Record<
     icon: "🔧",
   },
   supervisor_review: {
-    label: "Revision Supervisor",
+    label: "Revisión Supervisor",
     color: "#0369A1",
     bg: "#E0F2FE",
     icon: "🔍",

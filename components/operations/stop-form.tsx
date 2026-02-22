@@ -52,9 +52,9 @@ interface StopFormProps {
 }
 
 const SERVICE_TYPE_OPTIONS: { value: ServiceType; label: string }[] = [
-  { value: "installation", label: "Instalacion" },
+  { value: "installation", label: "Instalación" },
   { value: "maintenance", label: "Mantenimiento" },
-  { value: "repair", label: "Reparacion" },
+  { value: "repair", label: "Reparación" },
 ];
 
 function makeMaterialId() {
@@ -86,12 +86,14 @@ export function StopForm({
   const [supervisors, setSupervisors] = useState<
     Pick<Profile, "id" | "full_name">[]
   >([]);
+  const [supervisorsLoading, setSupervisorsLoading] = useState(false);
   const hasFetchedSupervisors = useRef(false);
 
   // Lazy-load supervisors when the modal first opens.
   useEffect(() => {
     if (!modalState.isOpen || hasFetchedSupervisors.current) return;
     hasFetchedSupervisors.current = true;
+    setSupervisorsLoading(true);
 
     const supabase = createClient();
     supabase
@@ -104,6 +106,7 @@ export function StopForm({
         const list = (data ?? []) as Pick<Profile, "id" | "full_name">[];
         setSupervisors(list);
         if (list.length > 0) setSupervisorId(list[0].id);
+        setSupervisorsLoading(false);
       });
   }, [modalState.isOpen]);
 
@@ -157,7 +160,7 @@ export function StopForm({
       return;
     }
     if (!address.trim()) {
-      setError("La direccion es obligatoria.");
+      setError("La dirección es obligatoria.");
       return;
     }
     if (!supervisorId) {
@@ -256,7 +259,7 @@ export function StopForm({
 
                     <div className="flex flex-col gap-1.5">
                       <label htmlFor="sf-client-email" className={labelCls}>
-                        Correo electronico
+                        Correo electrónico
                       </label>
                       <input
                         id="sf-client-email"
@@ -270,7 +273,7 @@ export function StopForm({
 
                     <div className="flex flex-col gap-1.5">
                       <label htmlFor="sf-client-phone" className={labelCls}>
-                        Telefono
+                        Teléfono
                       </label>
                       <input
                         id="sf-client-phone"
@@ -284,7 +287,7 @@ export function StopForm({
 
                     <div className="flex flex-col gap-1.5 sm:col-span-2">
                       <label htmlFor="sf-address" className={labelCls}>
-                        Direccion{" "}
+                        Dirección{" "}
                         <span className="text-red-500" aria-hidden="true">
                           *
                         </span>
@@ -395,7 +398,7 @@ export function StopForm({
                         value={instructions}
                         onChange={(e) => setInstructions(e.target.value)}
                         rows={3}
-                        placeholder="Indicaciones especiales para el tecnico..."
+                        placeholder="Indicaciones especiales para el técnico..."
                         className={inputCls}
                       />
                     </div>
@@ -501,7 +504,7 @@ export function StopForm({
                 <Button
                   type="submit"
                   variant="primary"
-                  isDisabled={isPending}
+                  isDisabled={isPending || supervisorsLoading}
                   aria-busy={isPending}
                 >
                   {isPending ? "Guardando..." : "Guardar Parada"}

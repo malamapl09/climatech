@@ -25,6 +25,9 @@ export default async function RootPage() {
     .eq("id", user.id)
     .single();
 
-  const role = (profile?.role as UserRole) || "technician";
+  if (!profile) {
+    redirect("/iniciar-sesion");
+  }
+  const role = profile.role as UserRole;
   redirect(roleRedirects[role]);
 }

@@ -171,13 +171,64 @@ export function JobApprovalForm({
     );
   }
 
-  // Fallback — some photos still rejected
+  // Fallback — some photos still rejected, allow full job rejection
   return (
-    <div
-      className="rounded-lg px-4 py-2.5 text-center text-[13px] font-semibold"
-      style={{ background: "rgba(255,255,255,0.7)", color: "#D97706" }}
-    >
-      Hay fotos rechazadas pendientes de resubida por el tecnico
+    <div className="space-y-3">
+      <div
+        className="rounded-lg px-4 py-2.5 text-center text-[13px] font-semibold"
+        style={{ background: "rgba(255,255,255,0.7)", color: "#D97706" }}
+      >
+        Hay fotos rechazadas pendientes de resubida por el tecnico
+      </div>
+      {showReject ? (
+        <div
+          className="rounded-[10px] p-3.5"
+          style={{ background: "#FEF2F2" }}
+        >
+          <textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Motivo del rechazo del trabajo..."
+            className="w-full resize-y rounded-lg p-2.5 text-[13px] outline-none"
+            style={{
+              border: "2px solid #FECACA",
+              minHeight: 50,
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+            }}
+          />
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={handleReject}
+              disabled={loading || !rejectReason.trim()}
+              className="cursor-pointer rounded-lg border-none px-[18px] py-2 text-xs font-bold text-white"
+              style={{ background: "#DC2626" }}
+            >
+              Confirmar Rechazo
+            </button>
+            <button
+              onClick={() => setShowReject(false)}
+              className="cursor-pointer rounded-lg px-[18px] py-2 text-xs font-semibold"
+              style={{
+                border: "1px solid #E5E7EB",
+                background: "#fff",
+                color: "#6B7280",
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowReject(true)}
+          disabled={loading}
+          className="w-full cursor-pointer rounded-[10px] bg-transparent px-5 py-2.5 text-[13px] font-bold"
+          style={{ border: "2px solid #DC2626", color: "#DC2626" }}
+        >
+          ✗ Rechazar Trabajo Completo
+        </button>
+      )}
     </div>
   );
 }

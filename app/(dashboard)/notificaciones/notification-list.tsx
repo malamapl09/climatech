@@ -30,8 +30,8 @@ const typeIcons: Record<NotificationType, React.ReactNode> = {
 const JOB_PATH_BY_ROLE: Record<UserRole, string> = {
   technician: "/tecnico/trabajo",
   supervisor: "/supervisor/trabajo",
-  operations: "/operaciones",
-  admin: "/admin/trabajos",
+  operations: "/operaciones/trabajo",
+  admin: "/operaciones/trabajo",
 };
 
 export function NotificationList({
@@ -117,7 +117,7 @@ export function NotificationList({
                       </span>
                     </div>
                     <div className="mt-2 flex gap-2">
-                      {n.job_id && JOB_PATH_BY_ROLE[userRole] !== "/operaciones" && JOB_PATH_BY_ROLE[userRole] !== "/admin/trabajos" && (
+                      {n.job_id && (
                         <Link href={`${JOB_PATH_BY_ROLE[userRole]}/${n.job_id}`}>
                           <Button variant="ghost" size="sm">
                             Ver trabajo

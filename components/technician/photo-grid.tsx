@@ -31,7 +31,8 @@ export function PhotoGrid({ photos }: { photos: Photo[] }) {
     }
 
     if (photos.length > 0) loadUrls();
-  }, [photos]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos.map((p) => p.id).join(",")]);
 
   if (photos.length === 0) {
     return <p className="text-sm text-gray-500">No hay fotos aun.</p>;

@@ -57,6 +57,13 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Reset rejected photos back to pending so technician can re-upload
+  await supabase
+    .from("photos")
+    .update({ status: "pending", reject_reason: null, rejected_by: null })
+    .eq("job_id", id)
+    .eq("status", "rejected");
+
   // Log activity
   await supabase.from("activity_log").insert({
     job_id: id,

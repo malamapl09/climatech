@@ -26,6 +26,15 @@ export function ReportPreview({
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
   const approvedPhotos = job.photos.filter((p) => p.status === "approved");
 
+  // Close on Escape key
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
   useEffect(() => {
     const supabase = createClient();
     async function loadUrls() {
@@ -48,6 +57,8 @@ export function ReportPreview({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       className="fixed inset-0 z-[1000] flex items-center justify-center p-5"
       style={{ background: "rgba(0,0,0,0.5)" }}
       onClick={onClose}
@@ -118,7 +129,7 @@ export function ReportPreview({
                 </div>
               )}
               <div className="text-xs" style={{ color: "#6B7280" }}>
-                Tecnico: {job.technician.full_name}
+                Técnico: {job.technician.full_name}
               </div>
             </div>
           </div>
@@ -157,7 +168,7 @@ export function ReportPreview({
                 className="mb-2.5 text-[10px] font-bold uppercase"
                 style={{ color: "#9CA3AF" }}
               >
-                Evidencia Fotografica ({approvedPhotos.length})
+                Evidencia Fotográfica ({approvedPhotos.length})
               </div>
               <div
                 className="grid gap-2.5"

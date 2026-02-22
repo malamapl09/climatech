@@ -40,7 +40,7 @@ export async function POST(
     );
   }
 
-  // Verify all photos are approved (no pending or rejected)
+  // Verify no pending or rejected photos remain
   const { count: pendingOrRejected } = await supabase
     .from("photos")
     .select("*", { count: "exact", head: true })
@@ -50,6 +50,20 @@ export async function POST(
   if (pendingOrRejected && pendingOrRejected > 0) {
     return NextResponse.json(
       { error: "Todas las fotos deben estar aprobadas antes de aprobar el trabajo" },
+      { status: 400 }
+    );
+  }
+
+  // Verify at least 1 approved photo exists
+  const { count: approvedCount } = await supabase
+    .from("photos")
+    .select("*", { count: "exact", head: true })
+    .eq("job_id", id)
+    .eq("status", "approved");
+
+  if (!approvedCount || approvedCount === 0) {
+    return NextResponse.json(
+      { error: "Debe haber al menos una foto aprobada para aprobar el trabajo" },
       { status: 400 }
     );
   }

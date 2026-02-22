@@ -43,10 +43,10 @@ export function ClientReport({
           <Hr />
           <Section>
             <Text><strong>Cliente:</strong> {clientName}</Text>
-            <Text><strong>Direccion:</strong> {address}</Text>
+            <Text><strong>Dirección:</strong> {address}</Text>
             <Text><strong>Tipo de servicio:</strong> {serviceType}</Text>
             {equipment && <Text><strong>Equipo:</strong> {equipment}</Text>}
-            <Text><strong>Tecnico:</strong> {technicianName}</Text>
+            <Text><strong>Técnico:</strong> {technicianName}</Text>
           </Section>
 
           {supervisorNotes && (
@@ -59,7 +59,7 @@ export function ClientReport({
           {photos.length > 0 && (
             <Section>
               <Heading as="h3" style={{ fontSize: "18px" }}>
-                Evidencia Fotografica ({photos.length})
+                Evidencia Fotográfica ({photos.length})
               </Heading>
               {photos.map((photo, i) => (
                 <Section key={i} style={{ marginBottom: "16px" }}>
@@ -73,7 +73,7 @@ export function ClientReport({
           {reportUrl && (
             <Section>
               <Text>
-                Tambien puede ver este reporte en linea:{" "}
+                También puede ver este reporte en línea:{" "}
                 <Link href={reportUrl}>Ver reporte</Link>
               </Text>
             </Section>
@@ -81,7 +81,7 @@ export function ClientReport({
 
           <Hr />
           <Text style={{ fontSize: "12px", color: "#94a3b8" }}>
-            Este reporte fue generado automaticamente por ClimaTech.
+            Este reporte fue generado automáticamente por ClimaTech.
           </Text>
         </Container>
       </Body>

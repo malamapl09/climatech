@@ -9,7 +9,7 @@ import type {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   operations: "Operaciones",
-  technician: "Tecnico",
+  technician: "Técnico",
   supervisor: "Supervisor",
   admin: "Administrador",
 };
@@ -17,7 +17,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   scheduled: "Programado",
   in_progress: "En Progreso",
-  supervisor_review: "Revision Supervisor",
+  supervisor_review: "Revisión Supervisor",
   approved: "Aprobado",
   report_sent: "Reporte Enviado",
 };
@@ -29,23 +29,23 @@ export const PHOTO_STATUS_LABELS: Record<PhotoStatus, string> = {
 };
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  installation: "Instalacion",
+  installation: "Instalación",
   maintenance: "Mantenimiento",
-  repair: "Reparacion",
+  repair: "Reparación",
 };
 
 export const ACTIVITY_TYPE_LABELS: Record<ActivityType, string> = {
   status_change: "Cambio de estado",
   photo_upload: "Foto subida",
-  photo_review: "Revision de foto",
+  photo_review: "Revisión de foto",
   note: "Nota",
   report: "Reporte",
-  assignment: "Asignacion",
+  assignment: "Asignación",
 };
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   route_published: "Ruta publicada",
-  job_ready_for_review: "Trabajo listo para revision",
+  job_ready_for_review: "Trabajo listo para revisión",
   photo_rejected: "Foto rechazada",
   job_rejected: "Trabajo rechazado",
   job_approved: "Trabajo aprobado",

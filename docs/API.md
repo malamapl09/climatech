@@ -34,15 +34,15 @@ Technician submits job for supervisor review.
 
 **Auth:** Technician must be assigned to the job.
 
-**Validation:** Job must have at least 1 photo.
+**Validation:** Job must have at least 1 non-rejected photo.
 
 **Side effects:**
 - Updates job status to `supervisor_review`
 - Creates notification for the assigned supervisor (`job_ready_for_review`)
-- Logs activity: `"Trabajo enviado a revision del supervisor"`
+- Logs activity: `"Trabajo enviado a revisión del supervisor"`
 
 **Errors:**
-- 400 — No photos uploaded
+- 400 — No non-rejected photos uploaded
 - 400 — Job not in `in_progress` status
 
 ---
@@ -53,7 +53,9 @@ Supervisor approves the completed job.
 
 **Auth:** Supervisor must be assigned to the job.
 
-**Validation:** All photos must be approved (no pending or rejected).
+**Validation:**
+- All photos must be approved (no pending or rejected remaining)
+- At least 1 approved photo must exist
 
 **Body:**
 ```json
@@ -80,6 +82,7 @@ Supervisor rejects the job, returning it to the technician.
 
 **Side effects:**
 - Updates job status back to `in_progress`
+- Resets all rejected photos back to `pending` (clears `reject_reason` and `rejected_by`)
 - Creates notification for technician (`job_rejected`)
 - Logs activity: `"Trabajo rechazado: {reason}"`
 
@@ -99,7 +102,8 @@ Generates a report token, renders email, sends to client.
 - Renders React Email template with job data + photos
 - Sends email via Resend
 - Updates job status to `report_sent`
-- If email fails, **rolls back** status to `approved`
+- If email fails, **rolls back** status to `approved` and clears `report_token`, `report_sent_at`, `report_token_expires_at`
+- Creates notification for technician (`report_sent`)
 - Logs activity: `"Reporte enviado al cliente: {email}"`
 
 **Response:**
@@ -238,7 +242,7 @@ Located in `lib/actions/`. Called from Server Components and Client Components.
 |---|---|---|
 | `getUsers()` | `ProfileWithSupervisor[]` | All users with supervisor name |
 | `getUser(id)` | `Profile` | Single user |
-| `createUser(data)` | `AuthUser` | Uses admin client for `auth.admin.createUser` |
+| `createUser(data)` | `AuthUser` | Uses admin client for `auth.admin.createUser`. Rolls back auth user on profile failure. |
 | `updateUser(id, data)` | `void` | Update name, phone, role, zone, supervisor, active |
 | `toggleUserActive(id, isActive)` | `void` | Enable/disable user |
 
@@ -339,10 +343,9 @@ API Route (e.g., /api/jobs/[id]/complete)
   3. Supabase Realtime broadcasts INSERT to subscribers
 
 Client: NotificationBell component
-  1. Subscribes to postgres_changes on notifications table
-  2. Filters for current user's notifications
-  3. Shows toast via Sonner
-  4. Updates unread count badge
+  1. Subscribes to postgres_changes on notifications table (INSERT + UPDATE)
+  2. Re-fetches unread count on any change
+  3. Updates unread count badge (decrements when marked read)
 ```
 
 ### Report Generation

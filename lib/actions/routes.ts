@@ -110,7 +110,12 @@ export async function createRoute({
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error("Este tecnico ya tiene una ruta asignada para esta fecha.");
+    }
+    throw new Error(error.message);
+  }
 
   return data as Route;
 }

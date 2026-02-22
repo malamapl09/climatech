@@ -37,11 +37,14 @@ export default async function AdminDashboardPage() {
       .eq("status", "report_sent")
       .gte("created_at", `${today}T00:00:00`),
     supabase.from("jobs").select("*", { count: "exact", head: true })
-      .eq("service_type", "installation"),
+      .eq("service_type", "installation")
+      .gte("created_at", `${today}T00:00:00`),
     supabase.from("jobs").select("*", { count: "exact", head: true })
-      .eq("service_type", "maintenance"),
+      .eq("service_type", "maintenance")
+      .gte("created_at", `${today}T00:00:00`),
     supabase.from("jobs").select("*", { count: "exact", head: true })
-      .eq("service_type", "repair"),
+      .eq("service_type", "repair")
+      .gte("created_at", `${today}T00:00:00`),
     supabase.from("profiles").select("*", { count: "exact", head: true })
       .eq("role", "technician")
       .eq("is_active", true),

@@ -7,12 +7,16 @@ import { ROLE_LABELS } from "@/lib/labels";
 import type { Profile } from "@/types";
 
 function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
+  return (
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
 
 export function Header({

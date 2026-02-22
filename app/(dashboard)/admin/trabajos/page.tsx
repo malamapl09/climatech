@@ -30,7 +30,7 @@ export default async function AdminJobsPage({
       `*,
       technician:profiles!jobs_technician_id_fkey(id, full_name),
       supervisor:profiles!jobs_supervisor_id_fkey(id, full_name),
-      route:routes!jobs_route_id_fkey(date)`,
+      route:routes!jobs_route_id_fkey!inner(date)`,
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -49,10 +49,10 @@ export default async function AdminJobsPage({
     query = query.eq("service_type", params.service_type as ServiceType);
   }
   if (params.date_from) {
-    query = query.gte("created_at", `${params.date_from}T00:00:00`);
+    query = query.gte("route.date", params.date_from);
   }
   if (params.date_to) {
-    query = query.lte("created_at", `${params.date_to}T23:59:59`);
+    query = query.lte("route.date", params.date_to);
   }
 
   const { data: jobs, count } = await query;

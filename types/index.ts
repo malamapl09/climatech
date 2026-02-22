@@ -166,7 +166,7 @@ export interface JobWithDetails extends Job {
 }
 
 export interface ActivityLogWithPerformer extends ActivityLog {
-  performer: Pick<Profile, "id" | "full_name">;
+  performer: Pick<Profile, "id" | "full_name"> | null;
 }
 
 // ── Nav ──

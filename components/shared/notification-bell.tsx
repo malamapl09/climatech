@@ -29,12 +29,19 @@ export function NotificationBell() {
 
     fetchCount();
 
-    // Subscribe to realtime notification inserts
+    // Subscribe to realtime notification inserts and updates
     const channel = supabase
       .channel("notifications-bell")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications" },
+        () => {
+          fetchCount();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notifications" },
         () => {
           fetchCount();
         }

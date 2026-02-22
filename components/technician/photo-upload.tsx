@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/react";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { FormField } from "@/components/shared/form-field";
@@ -18,10 +18,18 @@ export function PhotoUpload({
   onUploaded: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Revoke preview URL on unmount to prevent memory leak
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
 
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -38,9 +46,11 @@ export function PhotoUpload({
       return;
     }
     // Revoke previous object URL to prevent memory leak
-    if (preview) URL.revokeObjectURL(preview);
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const url = URL.createObjectURL(f);
+    previewUrlRef.current = url;
     setFile(f);
-    setPreview(URL.createObjectURL(f));
+    setPreview(url);
   }
 
   async function handleUpload() {
@@ -110,7 +120,10 @@ export function PhotoUpload({
       });
 
       toast.success("Foto subida exitosamente");
-      if (preview) URL.revokeObjectURL(preview);
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
       setFile(null);
       setPreview(null);
       setDescription("");
@@ -158,8 +171,8 @@ export function PhotoUpload({
       {file && (
         <>
           <FormField
-            label="Descripcion de la foto"
-            placeholder="Ej: Ubicacion propuesta para unidad exterior"
+            label="Descripción de la foto"
+            placeholder="Ej: Ubicación propuesta para unidad exterior"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
