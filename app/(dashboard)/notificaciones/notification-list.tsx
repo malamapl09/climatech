@@ -12,6 +12,7 @@ import {
   Send,
   Map,
   CheckCheck,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { markAsRead, markAllAsRead } from "@/lib/actions/notifications";
@@ -28,6 +29,7 @@ const typeIcons: Record<NotificationType, React.ReactNode> = {
   report_sent: <Send className="h-5 w-5 text-teal-500" />,
   job_overdue: <AlertTriangle className="h-5 w-5 text-amber-600" />,
   job_cancelled: <XCircle className="h-5 w-5 text-red-600" />,
+  job_running_late: <AlertTriangle className="h-5 w-5 text-red-500" />,
 };
 
 const JOB_PATH_BY_ROLE: Record<UserRole, string> = {
@@ -74,22 +76,33 @@ export function NotificationList({
 
   return (
     <div className="space-y-4">
-      {unreadCount > 0 && (
-        <div className="flex items-center justify-between">
-          <Chip variant="soft" color="accent">
-            {unreadCount} sin leer
-          </Chip>
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={handleMarkAllRead}
-            isDisabled={isPending}
-          >
-            <CheckCheck className="mr-1 h-4 w-4" />
-            Marcar todas como leidas
-          </Button>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <Chip variant="soft" color="accent">
+              {unreadCount} sin leer
+            </Chip>
+          )}
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={handleMarkAllRead}
+              isDisabled={isPending}
+            >
+              <CheckCheck className="mr-1 h-4 w-4" />
+              Marcar todas como leidas
+            </Button>
+          )}
+          <Link href="/notificaciones/preferencias">
+            <Button variant="ghost" size="sm">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
 
       {notifications.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">

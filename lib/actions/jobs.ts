@@ -143,6 +143,7 @@ const ALLOWED_UPDATE_FIELDS = [
   "estimated_time",
   "instructions",
   "supervisor_notes",
+  "supervisor_id",
 ] as const;
 
 type AllowedJobUpdate = Partial<Pick<Job, (typeof ALLOWED_UPDATE_FIELDS)[number]>>;

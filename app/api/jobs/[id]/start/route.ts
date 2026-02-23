@@ -37,10 +37,10 @@ export async function POST(
     );
   }
 
-  // Update status
+  // Update status and record start time
   const { error } = await supabase
     .from("jobs")
-    .update({ status: "in_progress" })
+    .update({ status: "in_progress", started_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) {

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getRecentActivity } from "@/lib/actions/activity-log";
-import { checkOverdueJobs } from "@/lib/actions/check-overdue";
+import { checkOverdueJobs, checkRunningLateJobs } from "@/lib/actions/check-overdue";
 import { DashboardStats } from "@/components/admin/dashboard-stats";
 import { RoutesSummary } from "@/components/admin/routes-summary";
 import { ServiceTypeChart } from "@/components/admin/service-type-chart";
@@ -29,8 +29,9 @@ export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const today = todayISO();
 
-  // Fire-and-forget: create overdue notifications without blocking render
+  // Fire-and-forget: create overdue/late notifications without blocking render
   checkOverdueJobs().catch(() => {});
+  checkRunningLateJobs().catch(() => {});
 
   const [
     { count: totalJobsToday },

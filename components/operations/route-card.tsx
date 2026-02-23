@@ -57,6 +57,13 @@ export function RouteCard({ route, onMutated, onReassignJob }: RouteCardProps) {
   const doneCount = jobs.filter((j) => isCompletedStatus(j.status)).length;
   const pendCount = jobs.filter((j) => j.status === "scheduled").length;
 
+  // Check for delayed jobs (elapsed time > estimated time)
+  const hasDelayedJob = jobs.some((j) => {
+    if (j.status !== "in_progress" || !j.started_at || !j.estimated_time) return false;
+    const elapsedMinutes = (Date.now() - Date.parse(j.started_at)) / 60000;
+    return elapsedMinutes > j.estimated_time;
+  });
+
   // Workload: total estimated hours from non-cancelled jobs
   const totalMinutes = jobs
     .filter((j) => !isCancelled(j.status))
@@ -129,6 +136,15 @@ export function RouteCard({ route, onMutated, onReassignJob }: RouteCardProps) {
                 style={{ background: "#FEF3C7", color: "#D97706" }}
               >
                 🔧 En sitio
+              </span>
+            )}
+            {hasDelayedJob && (
+              <span
+                className="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                style={{ background: "#FEE2E2", color: "#DC2626" }}
+              >
+                <AlertTriangle className="mr-0.5 inline h-3 w-3" />
+                Retrasado
               </span>
             )}
             <span

@@ -1,6 +1,6 @@
 import { getRoutesForDate } from "@/lib/actions/routes";
 import { getAllOverdueJobs } from "@/lib/actions/jobs";
-import { checkOverdueJobs } from "@/lib/actions/check-overdue";
+import { checkOverdueJobs, checkRunningLateJobs } from "@/lib/actions/check-overdue";
 import { todayISO } from "@/lib/utils/date";
 import { RoutePlanner } from "@/components/operations/route-planner";
 
@@ -15,6 +15,7 @@ export default async function OperationsPage({
     getRoutesForDate(date),
     getAllOverdueJobs(),
     checkOverdueJobs(),
+    checkRunningLateJobs(),
   ]);
 
   return (

@@ -35,7 +35,8 @@ export type NotificationType =
   | "job_approved"
   | "report_sent"
   | "job_overdue"
-  | "job_cancelled";
+  | "job_cancelled"
+  | "job_running_late";
 
 // ── Database row types ──
 export interface Profile {
@@ -47,6 +48,7 @@ export interface Profile {
   zone: string | null;
   supervisor_id: string | null;
   is_active: boolean;
+  notification_preferences?: Record<string, boolean>;
   created_at: string;
   updated_at: string;
 }
@@ -95,6 +97,7 @@ export interface Job {
   report_sent_at: string | null;
   report_token: string | null;
   report_token_expires_at: string | null;
+  started_at: string | null;
   cancel_reason: string | null;
   cancelled_by: string | null;
   cancelled_at: string | null;

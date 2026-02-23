@@ -12,6 +12,7 @@ import { PhotoUpload } from "@/components/technician/photo-upload";
 import { PhotoGrid } from "@/components/technician/photo-grid";
 import { MaterialsList } from "@/components/technician/materials-list";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
+import { logActivity } from "@/lib/actions/activity-log";
 import type { Job, Photo, Material, ActivityType } from "@/types";
 
 interface JobExecutionProps {
@@ -35,6 +36,8 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
   const [isStarting, setIsStarting] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [activeTab, setActiveTab] = useState<"fotos" | "bitacora">("fotos");
+  const [noteText, setNoteText] = useState("");
+  const [isAddingNote, setIsAddingNote] = useState(false);
 
   const canStart = job.status === "scheduled";
   const canComplete = job.status === "in_progress" && job.photos.length > 0;
@@ -54,6 +57,21 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
       toast.error(err instanceof Error ? err.message : "Error");
     } finally {
       setIsStarting(false);
+    }
+  }
+
+  async function handleAddNote() {
+    if (!noteText.trim()) return;
+    setIsAddingNote(true);
+    try {
+      await logActivity({ jobId: job.id, action: noteText.trim(), type: "note" });
+      setNoteText("");
+      toast.success("Nota agregada");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al agregar nota");
+    } finally {
+      setIsAddingNote(false);
     }
   }
 
@@ -305,11 +323,36 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
 
       {/* Tab content: Bitacora */}
       {activeTab === "bitacora" && (
-        <div
-          className="rounded-[14px] bg-white p-[22px]"
-          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
-        >
-          <ActivityTimeline entries={activityLog} />
+        <div className="space-y-3">
+          {job.status === "in_progress" && (
+            <div
+              className="rounded-[14px] bg-white p-[22px]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Escribe una nota..."
+                rows={2}
+                className="mb-2 w-full resize-none rounded-lg border p-2.5 text-sm outline-none"
+                style={{ borderColor: "#E5E7EB" }}
+              />
+              <button
+                onClick={handleAddNote}
+                disabled={isAddingNote || !noteText.trim()}
+                className="cursor-pointer rounded-lg border-none px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+                style={{ background: "#1E3A5F" }}
+              >
+                {isAddingNote ? "Guardando..." : "Agregar Nota"}
+              </button>
+            </div>
+          )}
+          <div
+            className="rounded-[14px] bg-white p-[22px]"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+          >
+            <ActivityTimeline entries={activityLog} />
+          </div>
         </div>
       )}
     </div>

@@ -6,6 +6,7 @@ import {
   Users,
   Briefcase,
   Bell,
+  BarChart3,
 } from "lucide-react";
 import type { UserRole } from "@/types";
 
@@ -31,6 +32,7 @@ export const navByRole: Record<UserRole, NavItem[]> = {
   admin: [
     { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="h-5 w-5" /> },
     { label: "Trabajos", href: "/admin/trabajos", icon: <Briefcase className="h-5 w-5" /> },
+    { label: "Reportes", href: "/admin/reportes", icon: <BarChart3 className="h-5 w-5" /> },
     { label: "Usuarios", href: "/admin/usuarios", icon: <Users className="h-5 w-5" /> },
     { label: "Notificaciones", href: "/notificaciones", icon: <Bell className="h-5 w-5" /> },
   ],

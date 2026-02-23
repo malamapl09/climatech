@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Download } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import type { Job } from "@/types";
@@ -11,7 +12,13 @@ type TableJob = Job & {
   route: { date: string } | null;
 };
 
-export function JobsTable({ jobs }: { jobs: TableJob[] }) {
+export function JobsTable({
+  jobs,
+  filters,
+}: {
+  jobs: TableJob[];
+  filters?: Record<string, string | undefined>;
+}) {
   const router = useRouter();
 
   if (jobs.length === 0) {
@@ -33,8 +40,24 @@ export function JobsTable({ jobs }: { jobs: TableJob[] }) {
       className="overflow-hidden rounded-[14px] bg-white"
       style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
     >
-      <div className="px-5 py-4" style={{ borderBottom: "1px solid #F3F4F6" }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid #F3F4F6" }}>
         <h2 className="text-base font-bold">Todos los Trabajos</h2>
+        <button
+          onClick={() => {
+            const sp = new URLSearchParams();
+            if (filters) {
+              Object.entries(filters).forEach(([k, v]) => {
+                if (v && k !== "page") sp.set(k, v);
+              });
+            }
+            window.open(`/api/jobs/export-csv?${sp.toString()}`, "_blank");
+          }}
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-gray-50"
+          style={{ borderColor: "#E5E7EB", color: "#374151" }}
+        >
+          <Download className="h-3.5 w-3.5" />
+          Exportar CSV
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full" style={{ borderCollapse: "collapse" }}>

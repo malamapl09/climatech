@@ -82,7 +82,7 @@ export default async function AdminJobsPage({
         supervisors={supervisors || []}
         currentFilters={params}
       />
-      <JobsTable jobs={jobs || []} />
+      <JobsTable jobs={jobs || []} filters={params} />
       {totalPages > 1 && (
         <Pagination currentPage={page} totalPages={totalPages} params={params} />
       )}

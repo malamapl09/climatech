@@ -18,6 +18,16 @@ export async function createNotification({
 }) {
   const supabase = await createClient();
 
+  // Check user's notification preferences — if explicitly disabled, skip
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("notification_preferences")
+    .eq("id", userId)
+    .single();
+
+  const prefs = (profile?.notification_preferences as Record<string, boolean>) ?? {};
+  if (prefs[type] === false) return;
+
   const { error } = await supabase.from("notifications").insert({
     user_id: userId,
     type,

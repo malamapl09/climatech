@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useOverlayState } from "@heroui/react";
 import { toast } from "sonner";
 import { WorkflowStepper } from "@/components/shared/workflow-stepper";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -10,6 +11,7 @@ import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import { NavigationLinks } from "@/components/shared/navigation-links";
 import { PhotoGrid } from "@/components/technician/photo-grid";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
+import { EditJobForm } from "@/components/operations/edit-job-form";
 import type { Job, Photo, Material, ActivityType } from "@/types";
 
 interface JobDetailProps {
@@ -32,6 +34,7 @@ interface JobDetailProps {
 export function JobDetail({ job, activityLog }: JobDetailProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"fotos" | "bitacora">("fotos");
+  const editModalState = useOverlayState();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
@@ -184,6 +187,26 @@ export function JobDetail({ job, activityLog }: JobDetailProps) {
       <div className="mb-4">
         <NavigationLinks address={job.address} mode="full" />
       </div>
+
+      {/* Edit button + modal (only for scheduled jobs) */}
+      {job.status === "scheduled" && (
+        <>
+          <div className="mb-4">
+            <button
+              onClick={() => editModalState.open()}
+              className="w-full cursor-pointer rounded-[14px] border-2 bg-white py-3 text-center text-[13px] font-semibold transition-colors hover:bg-blue-50"
+              style={{ borderColor: "#93C5FD", color: "#1E3A5F" }}
+            >
+              Editar Trabajo
+            </button>
+          </div>
+          <EditJobForm
+            job={job}
+            modalState={editModalState}
+            onSaved={() => router.refresh()}
+          />
+        </>
+      )}
 
       {/* Cancel button (operations/admin only) */}
       {canCancel && (
