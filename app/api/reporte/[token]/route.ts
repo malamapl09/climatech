@@ -76,10 +76,14 @@ export async function GET(
     .info p { margin: 4px 0; font-size: 14px; }
     .notes { background: #f1f5f9; padding: 16px; border-radius: 8px; margin: 16px 0; }
     .footer { font-size: 12px; color: #94a3b8; text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+    .download-btn { display: inline-block; background: #2563eb; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; }
+    .download-btn:hover { background: #1d4ed8; }
+    @media print { .download-btn { display: none !important; } }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="download-btn" onclick="downloadPDF()">📥 Descargar PDF</button>
     <h1>ClimaTech — Reporte de Servicio</h1>
     <hr style="border:none;border-top:1px solid #e2e8f0;" />
     <div class="info">
@@ -96,6 +100,30 @@ export async function GET(
       <p>Este reporte fue generado por ClimaTech — Gestion de Servicio en Campo</p>
     </div>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js" integrity="sha384-aBc0BOllaGWrQx51DYt978St/L7B+21jzNGc4N/jnGD0NxGwj8S/ftRgW0AkXIak" crossorigin="anonymous"></script>
+  <script>
+    function downloadPDF() {
+      var btn = document.querySelector('.download-btn');
+      if (typeof html2pdf === 'undefined') {
+        alert('No se pudo cargar el generador de PDF. Intente de nuevo.');
+        return;
+      }
+      btn.style.display = 'none';
+      var container = document.querySelector('.container');
+      html2pdf().set({
+        margin: 10,
+        filename: 'reporte-climatech.pdf',
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(container).save().then(function() {
+        btn.style.display = 'inline-block';
+      }).catch(function() {
+        btn.style.display = 'inline-block';
+        alert('Error al generar el PDF. Intente de nuevo.');
+      });
+    }
+  </script>
 </body>
 </html>`;
 

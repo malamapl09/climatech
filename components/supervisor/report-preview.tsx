@@ -238,6 +238,12 @@ export function ReportPreview({
               Cancelar
             </button>
           </div>
+          <div
+            className="mt-3 text-center text-[11px]"
+            style={{ color: "#6B7280" }}
+          >
+            Después de enviar el reporte por email, podrá compartirlo por WhatsApp.
+          </div>
         </div>
       </div>
     </div>

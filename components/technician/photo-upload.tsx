@@ -7,6 +7,7 @@ import { FormField } from "@/components/shared/form-field";
 import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { enqueuePhoto } from "@/lib/offline/photo-queue";
 
 export function PhotoUpload({
   jobId,
@@ -19,10 +20,19 @@ export function PhotoUpload({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const previewUrlRef = useRef<string | null>(null);
+  const cachedUserIdRef = useRef<string | null>(null);
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Cache user ID on mount for offline usage
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) cachedUserIdRef.current = user.id;
+    });
+  }, []);
 
   // Revoke preview URL on unmount to prevent memory leak
   useEffect(() => {
@@ -51,6 +61,43 @@ export function PhotoUpload({
     previewUrlRef.current = url;
     setFile(f);
     setPreview(url);
+  }
+
+  function clearForm() {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setFile(null);
+    setPreview(null);
+    setDescription("");
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  async function queueOfflinePhoto(
+    compressed: Blob,
+    ext: string,
+    latitude: number | null,
+    longitude: number | null,
+    userId: string
+  ) {
+    const fileName = `${jobId}/${Date.now()}.${ext}`;
+    await enqueuePhoto({
+      id: crypto.randomUUID(),
+      jobId,
+      blob: compressed,
+      fileName,
+      contentType: compressed.type || "image/jpeg",
+      description: description.trim(),
+      latitude,
+      longitude,
+      replacesId: replacesId || null,
+      userId,
+      createdAt: new Date().toISOString(),
+    });
+    toast.success("Foto guardada en cola (sin conexión)");
+    clearForm();
+    onUploaded();
   }
 
   async function handleUpload() {
@@ -83,6 +130,19 @@ export function PhotoUpload({
         // Geolocation not available — continue without it
       }
 
+      const ext = compressed.name.split(".").pop() || "jpg";
+
+      // If offline, queue the photo locally
+      if (!navigator.onLine) {
+        const userId = cachedUserIdRef.current;
+        if (!userId) {
+          toast.error("No se pudo identificar al usuario. Intenta con conexión.");
+          return;
+        }
+        await queueOfflinePhoto(compressed, ext, latitude, longitude, userId);
+        return;
+      }
+
       const supabase = createClient();
       const {
         data: { user },
@@ -90,13 +150,21 @@ export function PhotoUpload({
       if (!user) throw new Error("No autenticado");
 
       // Upload to storage
-      const ext = compressed.name.split(".").pop() || "jpg";
       const path = `${jobId}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("job-photos")
-        .upload(path, compressed, { contentType: compressed.type });
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from("job-photos")
+          .upload(path, compressed, { contentType: compressed.type });
 
-      if (uploadError) throw new Error(uploadError.message);
+        if (uploadError) throw uploadError;
+      } catch (networkErr) {
+        // If upload fails due to network, fall back to offline queue
+        if (!navigator.onLine || (networkErr instanceof TypeError && networkErr.message.includes("fetch"))) {
+          await queueOfflinePhoto(compressed, ext, latitude, longitude, user.id);
+          return;
+        }
+        throw networkErr;
+      }
 
       // Create photo record
       const { error: insertError } = await supabase.from("photos").insert({
@@ -120,14 +188,7 @@ export function PhotoUpload({
       });
 
       toast.success("Foto subida exitosamente");
-      if (previewUrlRef.current) {
-        URL.revokeObjectURL(previewUrlRef.current);
-        previewUrlRef.current = null;
-      }
-      setFile(null);
-      setPreview(null);
-      setDescription("");
-      if (fileRef.current) fileRef.current.value = "";
+      clearForm();
       onUploaded();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error al subir foto");

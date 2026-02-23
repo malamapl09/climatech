@@ -10,6 +10,7 @@ import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
 import { NavigationLinks } from "@/components/shared/navigation-links";
 import { PhotoUpload } from "@/components/technician/photo-upload";
 import { PhotoGrid } from "@/components/technician/photo-grid";
+import { PhotoQueueBanner } from "@/components/technician/photo-queue-banner";
 import { MaterialsList } from "@/components/technician/materials-list";
 import { ActivityTimeline } from "@/components/shared/activity-timeline";
 import { logActivity } from "@/lib/actions/activity-log";
@@ -284,15 +285,18 @@ export function JobExecution({ job, activityLog }: JobExecutionProps) {
       {activeTab === "fotos" && (
         <div className="space-y-3">
           {canUpload && (
-            <div
-              className="rounded-[14px] bg-white p-[22px]"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
-            >
-              <PhotoUpload
-                jobId={job.id}
-                onUploaded={() => router.refresh()}
-              />
-            </div>
+            <>
+              <PhotoQueueBanner onSynced={() => router.refresh()} />
+              <div
+                className="rounded-[14px] bg-white p-[22px]"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+              >
+                <PhotoUpload
+                  jobId={job.id}
+                  onUploaded={() => router.refresh()}
+                />
+              </div>
+            </>
           )}
 
           {job.photos.length === 0 ? (

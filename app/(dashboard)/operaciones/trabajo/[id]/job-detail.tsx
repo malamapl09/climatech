@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useOverlayState } from "@heroui/react";
 import { toast } from "sonner";
+import { MessageCircle } from "lucide-react";
 import { WorkflowStepper } from "@/components/shared/workflow-stepper";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ServiceTypeBadge } from "@/components/shared/service-type-badge";
@@ -320,6 +321,26 @@ export function JobDetail({ job, activityLog }: JobDetailProps) {
           {job.client_email && (
             <div className="mt-1 text-xs" style={{ color: "#4338CA" }}>
               Enviado a {job.client_email}
+            </div>
+          )}
+          {job.report_token && (
+            <div className="mt-3">
+              {job.client_phone ? (
+                <a
+                  href={`https://wa.me/${job.client_phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${job.client_name}, aquí tiene su reporte de servicio de ClimaTech: ${typeof window !== "undefined" ? window.location.origin : ""}/api/reporte/${job.report_token}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white no-underline"
+                  style={{ background: "#25D366" }}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Enviar por WhatsApp
+                </a>
+              ) : (
+                <div className="mt-1 text-[11px]" style={{ color: "#6B7280" }}>
+                  Sin teléfono del cliente
+                </div>
+              )}
             </div>
           )}
         </div>
